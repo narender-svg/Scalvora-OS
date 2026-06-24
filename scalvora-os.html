@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scalvora OS — Founder Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --bg2: #EFEDE8;
+    --primary: #0D1117;
+    --accent: #2563EB;
+    --accent-light: #EFF6FF;
+    --accent-mid: #DBEAFE;
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --text: #0D1117;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --success: #059669;
+    --success-bg: #ECFDF5;
+    --warning: #D97706;
+    --warning-bg: #FFFBEB;
+    --danger: #DC2626;
+    --sidebar-w: 240px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.05);
+    --shadow-lg: 0 10px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+    --font-head: 'Bricolage Grotesque', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* LAYOUT */
+  #app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: #FAFAF8;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    padding: 20px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo-mark {
+    display: flex; align-items: center; gap: 9px; text-decoration: none;
+  }
+  .logo-icon {
+    width: 30px; height: 30px; background: var(--primary);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-icon svg { width: 16px; height: 16px; }
+  .logo-text { font-family: var(--font-head); font-weight: 700; font-size: 15px; color: var(--primary); line-height: 1.1; }
+  .logo-sub { font-size: 10px; color: var(--text-muted); font-weight: 400; letter-spacing: .02em; }
+
+  .sidebar-section { padding: 8px 10px; }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-light); padding: 4px 8px 6px; display: block;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+    border-radius: 7px; cursor: pointer; transition: all .12s;
+    color: var(--text-muted); font-size: 13.5px; font-weight: 500;
+    user-select: none; position: relative;
+  }
+  .nav-item:hover { background: var(--bg2); color: var(--primary); }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: .65; }
+  .nav-item.active .nav-icon { opacity: 1; filter: brightness(10); }
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center;
+  }
+  .nav-item.active .nav-badge { background: rgba(255,255,255,.25); }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 12px 10px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+    border-radius: 8px; cursor: pointer;
+  }
+  .user-chip:hover { background: var(--bg2); }
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #2563EB, #7C3AED);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: var(--primary); }
+  .user-role { font-size: 11px; color: var(--text-muted); }
+
+  /* MAIN */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    height: 52px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px; gap: 12px;
+    background: #FAFAF8; flex-shrink: 0;
+  }
+  .topbar-title { font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--primary); flex: 1; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; font-family: var(--font-body); transition: all .12s;
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1D4ED8; }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg2); color: var(--primary); border-color: var(--border-strong); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn svg { width: 14px; height: 14px; }
+
+  #content { flex: 1; overflow-y: auto; padding: 28px 28px 40px; }
+
+  /* CARDS */
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title { font-family: var(--font-head); font-weight: 700; font-size: 15px; color: var(--primary); }
+  .card-subtitle { font-size: 12.5px; color: var(--text-muted); margin-top: 1px; }
+  .card-body { padding: 20px; }
+  .card-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    background: #FAFAF8; display: flex; align-items: center; gap: 10px;
+  }
+
+  /* STAT CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+  .stat-card {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 16px 18px; box-shadow: var(--shadow); transition: box-shadow .15s;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-md); }
+  .stat-icon {
+    width: 34px; height: 34px; border-radius: 9px; display: flex;
+    align-items: center; justify-content: center; margin-bottom: 10px;
+  }
+  .stat-icon svg { width: 17px; height: 17px; }
+  .stat-value { font-family: var(--font-head); font-weight: 700; font-size: 24px; color: var(--primary); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .stat-delta { font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .delta-up { color: var(--success); }
+  .delta-new { color: var(--accent); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-3-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 12.5px; font-weight: 600; color: var(--primary); margin-bottom: 5px; }
+  .form-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 8px 11px; border: 1px solid var(--border);
+    border-radius: 7px; font-family: var(--font-body); font-size: 13.5px; color: var(--primary);
+    background: #fff; transition: all .12s; outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  }
+  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* TAGS */
+  .tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 500;
+    background: var(--bg2); color: var(--text-muted); border: 1px solid var(--border); cursor: default;
+  }
+  .tag.accent { background: var(--accent-light); color: var(--accent); border-color: var(--accent-mid); }
+  .tag.success { background: var(--success-bg); color: var(--success); border-color: #A7F3D0; }
+  .tag-remove { cursor: pointer; opacity: .6; }
+  .tag-remove:hover { opacity: 1; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); padding: 10px 14px; border-bottom: 1px solid var(--border); background: #FAFAF8; }
+  .data-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #FAFAF8; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border-strong); border-radius: var(--radius-lg);
+    padding: 32px; text-align: center; transition: all .15s; cursor: pointer;
+    background: #FAFAF8;
+  }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-icon { width: 40px; height: 40px; margin: 0 auto 10px; background: var(--bg2); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .upload-icon svg { width: 20px; height: 20px; color: var(--text-muted); }
+  .upload-text { font-size: 13.5px; color: var(--text-muted); }
+  .upload-text strong { color: var(--accent); }
+  .upload-types { font-size: 11.5px; color: var(--text-light); margin-top: 4px; }
+
+  /* ACTIVITY */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 11px; padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .activity-dot svg { width: 13px; height: 13px; }
+  .activity-text { font-size: 13px; color: var(--text); flex: 1; }
+  .activity-time { font-size: 11.5px; color: var(--text-light); white-space: nowrap; }
+
+  /* QUICK ACTIONS */
+  .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .qa-btn {
+    padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: #fff; cursor: pointer; transition: all .12s; text-align: left;
+    display: flex; align-items: center; gap: 10px; font-family: var(--font-body);
+  }
+  .qa-btn:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .qa-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .qa-icon svg { width: 15px; height: 15px; }
+  .qa-label { font-size: 12.5px; font-weight: 600; color: var(--primary); }
+  .qa-desc { font-size: 11px; color: var(--text-muted); }
+
+  /* SECTION HEADING */
+  .section-title { font-family: var(--font-head); font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 4px; }
+  .section-desc { font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; }
+  .section-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .section-head-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* TOAST */
+  #toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+  .toast {
+    background: var(--primary); color: #fff; padding: 11px 16px; border-radius: 9px;
+    font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 8px; max-width: 320px;
+    animation: slideUp .2s ease;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* MODAL */
+  #modal-overlay {
+    position: fixed; inset: 0; background: rgba(13,17,23,.45); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+    animation: fadeIn .15s ease;
+  }
+  .modal {
+    background: #fff; border-radius: 14px; box-shadow: var(--shadow-lg);
+    width: 560px; max-width: 94vw; max-height: 88vh; overflow: hidden;
+    display: flex; flex-direction: column; animation: scaleIn .15s ease;
+  }
+  .modal-lg { width: 760px; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { transform: scale(.97); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header {
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: var(--font-head); font-weight: 700; font-size: 17px; color: var(--primary); }
+  .modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--bg2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .1s; }
+  .modal-close:hover { background: var(--border-strong); }
+  .modal-close svg { width: 14px; height: 14px; }
+  .modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* AI OUTPUT */
+  .ai-output {
+    background: linear-gradient(135deg, #F0F4FF 0%, #F7F6F3 100%);
+    border: 1px solid var(--accent-mid); border-radius: var(--radius-lg);
+    padding: 18px 20px; margin-top: 16px; position: relative;
+  }
+  .ai-output-label {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+  }
+  .ai-output-label svg { width: 13px; height: 13px; }
+  .ai-output-content { font-size: 13.5px; line-height: 1.7; color: var(--primary); white-space: pre-wrap; }
+  .ai-output-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--accent-mid); }
+
+  /* LOADING */
+  .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+  .loading-dots span {
+    width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+    animation: dot .9s infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: .15s; }
+  .loading-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 0%, 80%, 100% { opacity: .2; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+
+  /* PROGRESS BAR */
+  .progress-bar { height: 4px; background: var(--bg2); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s; }
+
+  /* PILL TABS */
+  .pill-tabs { display: flex; gap: 4px; background: var(--bg2); padding: 3px; border-radius: 8px; }
+  .pill-tab { padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all .12s; color: var(--text-muted); border: none; background: var(--bg2); font-family: var(--font-body); }
+  .pill-tab.active { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+  .pill-tabs .pill-tab { background: transparent; }
+  .pill-tabs .pill-tab.active { background: #fff; color: var(--primary); }
+
+  /* CALENDAR */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .cal-day {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 8px; min-height: 90px; position: relative;
+  }
+  .cal-day.has-content { border-color: var(--accent-mid); background: var(--accent-light); }
+  .cal-day-num { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+  .cal-post {
+    font-size: 10.5px; color: var(--accent); background: var(--accent-mid);
+    border-radius: 4px; padding: 2px 5px; margin-bottom: 3px; line-height: 1.3; cursor: pointer;
+  }
+  .cal-post.story { background: #FEF3C7; color: #92400E; }
+  .cal-post.edu { background: #D1FAE5; color: #065F46; }
+  .cal-post.case { background: #EDE9FE; color: #4C1D95; }
+  .cal-post.contrarian { background: #FEE2E2; color: #991B1B; }
+
+  /* CATEGORY BADGE */
+  .cat-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .cat-badge.sales { background: #FEF3C7; color: #92400E; }
+  .cat-badge.offer { background: #EDE9FE; color: #4C1D95; }
+  .cat-badge.newsletter { background: #D1FAE5; color: #065F46; }
+  .cat-badge.research { background: #DBEAFE; color: #1E40AF; }
+  .cat-badge.competitor { background: #FEE2E2; color: #991B1B; }
+  .cat-badge.personal { background: #F0FDF4; color: #166534; }
+  .cat-badge.testimonial { background: #FFF7ED; color: #9A3412; }
+  .cat-badge.book { background: #F3E8FF; color: #6B21A8; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 52px 20px; color: var(--text-muted); }
+  .empty-icon { width: 48px; height: 48px; background: var(--bg2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .empty-icon svg { width: 22px; height: 22px; }
+  .empty-title { font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--primary); margin-bottom: 5px; }
+  .empty-desc { font-size: 13px; line-height: 1.5; max-width: 300px; margin: 0 auto 18px; }
+
+  /* SEARCH BAR */
+  .search-bar { position: relative; }
+  .search-bar input { padding-left: 36px; }
+  .search-bar svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); pointer-events: none; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* SELECTED FILE */
+  .file-chip {
+    display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+    background: var(--accent-light); border: 1px solid var(--accent-mid);
+    border-radius: 8px; margin-top: 10px; font-size: 13px;
+  }
+  .file-chip svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+
+  /* AGENT CARD */
+  .agent-card {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 18px; transition: all .15s; cursor: pointer;
+  }
+  .agent-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+  .agent-avatar {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+  }
+  .agent-avatar svg { width: 22px; height: 22px; }
+  .agent-name { font-family: var(--font-head); font-weight: 700; font-size: 14.5px; color: var(--primary); margin-bottom: 4px; }
+  .agent-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; }
+  .agent-use { margin-top: 12px; font-size: 12px; color: var(--accent); font-weight: 600; }
+
+  /* PROMPT CARD */
+  .prompt-card {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .prompt-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
+  .prompt-body { flex: 1; min-width: 0; }
+  .prompt-title { font-size: 13.5px; font-weight: 600; color: var(--primary); margin-bottom: 3px; }
+  .prompt-preview { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prompt-actions { display: flex; gap: 6px; align-items: center; }
+
+  /* INSIGHT CARD */
+  .insight-pill {
+    display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px;
+    border-radius: 8px; background: var(--bg2); margin-bottom: 8px;
+  }
+  .insight-pill svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+  .insight-text { font-size: 13px; color: var(--primary); line-height: 1.45; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; }
+    #sidebar { display: none; }
+    #content { padding: 16px; }
+  }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* Inline flex gap util */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 16px; }
+  .ml-auto { margin-left: auto; }
+  .text-sm { font-size: 12.5px; }
+  .text-muted { color: var(--text-muted); }
+  .font-bold { font-weight: 700; }
+  .w-full { width: 100%; }
+  .text-success { color: var(--success); }
+  .text-accent { color: var(--accent); }
+  .text-danger { color: var(--danger); }
+
+  /* Inline highlight */
+  mark { background: #FEF9C3; color: var(--primary); padding: 0 2px; border-radius: 3px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11.5px; font-weight: 500;
+  }
+  .chip-blue { background: var(--accent-light); color: var(--accent); }
+  .chip-green { background: var(--success-bg); color: var(--success); }
+  .chip-orange { background: #FFF7ED; color: #C2410C; }
+  .chip-purple { background: #F3E8FF; color: #7E22CE; }
+
+  .info-box {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+    border-radius: 8px; border: 1px solid var(--accent-mid); background: var(--accent-light);
+    font-size: 13px; color: var(--primary); line-height: 1.5;
+  }
+  .info-box svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <a class="sidebar-logo-mark" href="#">
+        <div class="logo-icon">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 8L8 2L14 8L8 14L2 8Z" fill="white" opacity=".9"/><path d="M8 5L11 8L8 11L5 8L8 5Z" fill="white"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">Scalvora OS</div>
+          <div class="logo-sub">Founder Operating System</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Core</span>
+      <div class="nav-item active" data-page="dashboard">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="knowledge">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm0 1v10h10V3H3zm2 2h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/></svg>
+        Knowledge Vault
+        <span class="nav-badge" id="kv-badge">0</span>
+      </div>
+      <div class="nav-item" data-page="personal">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 13.5c0-3.3 2.7-6 6-6s6 2.7 6 6H2z"/></svg>
+        Personal Brand
+      </div>
+      <div class="nav-item" data-page="scalvora">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L1 5v6l7 4 7-4V5L8 1zm0 1.8L13.4 6 8 8.5 2.6 6 8 2.8zM2 7l5.4 2.9V14L2 11V7zm6.6 7V9.9L14 7v4l-5.4 3z"/></svg>
+        Scalvora Brand
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Intelligence</span>
+      <div class="nav-item" data-page="competitor">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M14 8A6 6 0 112 8a6 6 0 0112 0zM8 3a5 5 0 100 10A5 5 0 008 3zm0 2a3 3 0 110 6A3 3 0 018 5zm0 1a2 2 0 100 4A2 2 0 008 6z"/></svg>
+        Competitor Intel
+      </div>
+      <div class="nav-item" data-page="sales-analyzer">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2h14v2H1V2zm0 4h14v1H1V6zm0 3h8v1H1V9zm0 3h5v1H1v-1zm11-1l3 3-3 3v-2H9v-2h3v-2z"/></svg>
+        Sales Call Analyzer
+      </div>
+      <div class="nav-item" data-page="smart-search">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M11.4 10l3.3 3.3-1.4 1.4L10 11.4A6 6 0 1110 3a6 6 0 011.4 7zM6 10A4 4 0 106 2a4 4 0 000 8z"/></svg>
+        Smart Search
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Creation</span>
+      <div class="nav-item" data-page="content-studio">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v1H2V2zm2 3h8v1H4V5zm-2 3h12v1H2V8zm2 3h6v1H4v-1z"/><path d="M13 10l2 2-2 2v-1h-3v-2h3v-1z"/></svg>
+        Content Studio
+      </div>
+      <div class="nav-item" data-page="calendar">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.3"/></svg>
+        Content Calendar
+      </div>
+      <div class="nav-item" data-page="agents">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 8c0-1.7 1.3-3 3-3s3 1.3 3 3-1.3 3-3 3-3-1.3-3-3z"/><path d="M8 5V3M8 13v-2M3 8H1M15 8h-2M4.6 4.6L3.2 3.2M12.8 12.8l-1.4-1.4M4.6 11.4L3.2 12.8M12.8 3.2l-1.4 1.4" stroke="currentColor" stroke-width="1"/></svg>
+        AI Agents
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Library</span>
+      <div class="nav-item" data-page="assets">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="5" width="10" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 5V3a1 1 0 011-1h8a1 1 0 011 1v8a1 1 0 01-1 1h-2" stroke="currentColor" stroke-width="1.3"/></svg>
+        Brand Assets
+      </div>
+      <div class="nav-item" data-page="prompts">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v1l-5 4v7l-2-1V7L2 3V2z"/></svg>
+        Prompt Library
+      </div>
+      <div class="nav-item" data-page="export">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 13h10v1H3v-1zm4-10v7.6l-2.5-2.5-.7.7L8 13l4.2-4.2-.7-.7L9 10.6V3H7z"/></svg>
+        Export Center
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">System</span>
+      <div class="nav-item" data-page="settings">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 100-4 2 2 0 000 4zm1.3-6.8l.8 1.4a5 5 0 011.2.7l1.6-.3 1 1.7-1.2 1.1c0 .2.1.4.1.7s0 .5-.1.7l1.2 1.1-1 1.7-1.6-.3a5 5 0 01-1.2.7l-.8 1.4H6.7l-.8-1.4a5 5 0 01-1.2-.7l-1.6.3-1-1.7 1.2-1.1c0-.2-.1-.4-.1-.7s0-.5.1-.7L2.1 5.5l1-1.7 1.6.3A5 5 0 015.9 3.4l.8-1.4h2.6z"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">NY</div>
+        <div class="user-info">
+          <div class="user-name">Narender Yadav</div>
+          <div class="user-role">Founder, Scalvora</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div id="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- MODAL OVERLAY (hidden by default) -->
+<div id="modal-overlay" class="hidden"></div>
+
+<script>
+// ============================================================
+// DATA LAYER — localStorage persistence
+// ============================================================
+const DB = {
+  get(key, fallback = null) {
+    try { const v = localStorage.getItem('scalvora_' + key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+  },
+  set(key, val) {
+    try {
+      localStorage.setItem('scalvora_' + key, JSON.stringify(val));
+    } catch(e) {
+      // Storage quota hit — for array keys, trim oldest entries and retry
+      console.warn('Storage full, trimming:', key);
+      if (Array.isArray(val) && val.length > 5) {
+        try {
+          // Keep full content but trim the array
+          const trimmed = val.slice(0, Math.floor(val.length * 0.7));
+          localStorage.setItem('scalvora_' + key, JSON.stringify(trimmed));
+          toast('Storage limit reached — oldest items trimmed. Export backup to save all data.', 'error', 5000);
+        } catch(e2) { console.error('Cannot save even after trim', e2); }
+      }
+    }
+  },
+  // Save large content (files) with content truncated to 50k chars for storage
+  setDoc(key, val) {
+    const MAX_CONTENT = 50000; // 50k chars per document content field
+    try {
+      const toStore = Array.isArray(val) ? val.map(item => {
+        if (item.content && item.content.length > MAX_CONTENT) {
+          return { ...item, content: item.content.slice(0, MAX_CONTENT), _truncated: true };
+        }
+        return item;
+      }) : val;
+      localStorage.setItem('scalvora_' + key, JSON.stringify(toStore));
+    } catch(e) {
+      DB.set(key, val); // fallback to regular set with its own trim logic
+    }
+  }
+};
+
+// Initial data seeds
+const DEFAULT = {
+  personal: { fullStory:'', lifeTimeline:'', careerTimeline:'', freelancingJourney:'', agencyJourney:'', failures:'', lessons:'', bigWins:'', beliefs:'', philosophy:'', coreValues:'', lifeGoals:'', futureVision:'', contentPillars:'Agency Building, Cold Outreach, Lead Generation, AI, Entrepreneurship', favorites:'', writingStyle:'', contentStyle:'', postingStyle:'' },
+  scalvora: { mission:'Build AI-powered GTM and outbound systems that generate predictable pipeline.', vision:'Become the operating system for modern outbound growth.', targetAudience:'Agency Owners, Consultants, Coaches, B2B Founders, SaaS Companies', voice:'Premium, Strategic, Operator-Led, Enterprise, Data-Driven, Confident', vocabulary:'GTM Engine, Revenue Infrastructure, Pipeline System, Demand Generation, AI SDR, Outbound Operating System', avoid:'Hustle, Grind, Guru, 10X, Bro Marketing', offers:'', services:'', pricing:'', caseStudies:'', guarantees:'', methodologies:'', salesProcess:'' },
+  knowledge: [],
+  competitors: [],
+  salesCalls: [],
+  contentPieces: [],
+  prompts: [
+    { id:'p1', title:'LinkedIn Hook Formula', category:'Content', prompt:'Write a LinkedIn post hook using the "Controversial Truth" formula. Start with a counterintuitive statement, add a number, end with a colon. Make it specific to B2B SaaS. No emojis.' },
+    { id:'p2', title:'Scalvora GTM Analysis', category:'Scalvora', prompt:'Analyze this company\'s outbound GTM motion. Identify: (1) their ICP signals, (2) channel mix, (3) offer positioning, (4) what Scalvora would do differently to generate 3x pipeline.' },
+    { id:'p3', title:'Sales Call Pain Extraction', category:'Sales', prompt:'Extract all pain points from this sales call transcript. Group by: Primary Pains (business impact), Secondary Pains (operational friction), and Implied Pains (not stated but obvious). Format as a ranked list with exact quotes.' },
+  ],
+  calendar: [],
+  settings: { anthropicKey:'', defaultTone:'Professional', defaultAudience:'B2B Agency Owners' }
+};
+
+// Initialize data if not exists
+['personal','scalvora','settings'].forEach(k => { if(!DB.get(k)) DB.set(k, DEFAULT[k]); });
+['knowledge','competitors','salesCalls','contentPieces','prompts','calendar'].forEach(k => { if(!DB.get(k)) DB.set(k, DEFAULT[k]); });
+
+// ============================================================
+// ROUTING
+// ============================================================
+let currentPage = 'dashboard';
+
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  updateKVBadge();
+  render();
+}
+
+document.addEventListener('click', e => {
+  const nav = e.target.closest('.nav-item');
+  if (nav && nav.dataset.page) navigate(nav.dataset.page);
+});
+
+function updateKVBadge() {
+  const badge = document.getElementById('kv-badge');
+  if (badge) badge.textContent = DB.get('knowledge', []).length;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type='default', duration=3000) {
+  const icons = {
+    default: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2A1 1 0 018 4zm0 3h1v5H7V7h1z"/></svg>',
+    success: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 5.5L7 11 4.5 8.5l1-1 1.5 1.5 3.5-4 1 .5z"/></svg>',
+    error: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7v-2h2v2zm0-4H7V4h2v3z"/></svg>'
+  };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `${icons[type]||icons.default} <span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(title, bodyHTML, footerHTML='', size='') {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.innerHTML = `
+    <div class="modal ${size}">
+      <div class="modal-header">
+        <div class="modal-title">${title}</div>
+        <button class="modal-close" onclick="closeModal()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.7 4.7L9.4 8l3.3 3.3-1.4 1.4L8 9.4l-3.3 3.3-1.4-1.4L6.6 8 3.3 4.7l1.4-1.4L8 6.6l3.3-3.3z"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">${bodyHTML}</div>
+      ${footerHTML ? `<div class="modal-footer">${footerHTML}</div>` : ''}
+    </div>`;
+  overlay.classList.remove('hidden');
+  overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); }, {once:true});
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+// ============================================================
+// CLAUDE API CALL
+// ============================================================
+async function callClaude(prompt, systemPrompt='') {
+  const key = DB.get('settings', {}).anthropicKey || '';
+  const headers = { 'Content-Type': 'application/json' };
+  if (key) headers['x-api-key'] = key;
+  
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: prompt }]
+  };
+  if (systemPrompt) body.system = systemPrompt;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers, body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  return data.content?.[0]?.text || '';
+}
+
+// ============================================================
+// MASTER PROMPT BUILDER
+// ============================================================
+function buildMasterContext() {
+  const p = DB.get('personal', DEFAULT.personal);
+  const s = DB.get('scalvora', DEFAULT.scalvora);
+  const kv = DB.get('knowledge', []);
+  const sc = DB.get('salesCalls', []);
+  const comp = DB.get('competitors', []);
+
+  const kvSummary = kv.slice(-5).map(d => `- [${d.category}] ${d.title}: ${d.summary || d.content?.slice(0,200) || ''}`).join('\n');
+  const scInsights = sc.slice(-3).map(c => `- Pain: ${c.painPoints || ''} | Objections: ${c.objections || ''}`).join('\n');
+  const compInsights = comp.slice(-3).map(c => `- ${c.name}: ${c.insights || ''}`).join('\n');
+
+  return `## PERSONAL BRAND CONTEXT
+Name: Narender Yadav
+Story: ${p.fullStory || '(not filled yet)'}
+Big Wins: ${p.bigWins || '(not filled yet)'}
+Beliefs: ${p.beliefs || '(not filled yet)'}
+Content Pillars: ${p.contentPillars}
+Writing Style: ${p.writingStyle || 'Direct, founder-led, data-driven'}
+Failures & Lessons: ${p.failures || ''} ${p.lessons || ''}
+
+## SCALVORA BRAND CONTEXT
+Mission: ${s.mission}
+Vision: ${s.vision}
+Target Audience: ${s.targetAudience}
+Voice: ${s.voice}
+Vocabulary to use: ${s.vocabulary}
+Vocabulary to avoid: ${s.avoid}
+Offers: ${s.offers || '(not filled yet)'}
+Methodologies: ${s.methodologies || '(not filled yet)'}
+
+## KNOWLEDGE VAULT (recent docs)
+${kvSummary || '(no documents uploaded yet)'}
+
+## SALES CALL INTELLIGENCE
+${scInsights || '(no calls analyzed yet)'}
+
+## COMPETITOR INTELLIGENCE
+${compInsights || '(no competitors added yet)'}`;
+}
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+function render() {
+  const content = document.getElementById('content');
+  const title = document.getElementById('page-title');
+  const actions = document.getElementById('topbar-actions');
+  actions.innerHTML = '';
+
+  const pages = {
+    'dashboard': renderDashboard,
+    'knowledge': renderKnowledge,
+    'personal': renderPersonal,
+    'scalvora': renderScalvora,
+    'competitor': renderCompetitor,
+    'sales-analyzer': renderSalesAnalyzer,
+    'smart-search': renderSmartSearch,
+    'content-studio': renderContentStudio,
+    'calendar': renderCalendar,
+    'agents': renderAgents,
+    'assets': renderAssets,
+    'prompts': renderPrompts,
+    'export': renderExport,
+    'settings': renderSettings
+  };
+
+  const titles = {
+    'dashboard':'Dashboard','knowledge':'Knowledge Vault','personal':'Personal Brand Center',
+    'scalvora':'Scalvora Brand Center','competitor':'Competitor Intelligence',
+    'sales-analyzer':'Sales Call Analyzer','smart-search':'Smart Search',
+    'content-studio':'Content Studio','calendar':'Content Calendar','agents':'AI Agents',
+    'assets':'Brand Assets','prompts':'Prompt Library','export':'Export Center','settings':'Settings'
+  };
+
+  title.textContent = titles[currentPage] || 'Dashboard';
+  const fn = pages[currentPage];
+  if (fn) fn(content, actions);
+  else content.innerHTML = '<p style="padding:40px;color:var(--text-muted)">Coming soon.</p>';
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(el, actions) {
+  const kv = DB.get('knowledge', []);
+  const sc = DB.get('salesCalls', []);
+  const cp = DB.get('contentPieces', []);
+  const comp = DB.get('competitors', []);
+  const p = DB.get('personal', DEFAULT.personal);
+
+  const stories = kv.filter(d => d.category === 'Personal Stories').length;
+  const compAssets = comp.length;
+
+  const recent = [
+    ...kv.map(d => ({type:'upload',label:`Uploaded "${d.title}"`,cat:d.category,time:d.date})),
+    ...sc.map(d => ({type:'call',label:`Analyzed "${d.title}"`,cat:'Sales Call',time:d.date})),
+    ...cp.map(d => ({type:'content',label:`Generated: ${d.type} — ${d.topic}`,cat:d.type,time:d.date}))
+  ].sort((a,b) => new Date(b.time)-new Date(a.time)).slice(0,8);
+
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="navigate('content-studio')">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg>
+    New Content</button>`;
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EFF6FF">
+          <svg viewBox="0 0 16 16" fill="#2563EB"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" opacity=".3"/><path d="M5 6h6v1H5zM5 9h6v1H5z"/></svg>
+        </div>
+        <div class="stat-value">${kv.length}</div>
+        <div class="stat-label">Documents Uploaded</div>
+        <div class="stat-delta delta-new">Knowledge Vault</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F0FDF4">
+          <svg viewBox="0 0 16 16" fill="#059669"><path d="M1 2h14v2H1V2zm0 4h14v1H1V6zm0 3h8v1H1V9z" opacity=".5"/><path d="M13 10l2 2-2 2v-1.5h-3v-1h3V10z"/></svg>
+        </div>
+        <div class="stat-value">${sc.length}</div>
+        <div class="stat-label">Sales Calls Analyzed</div>
+        <div class="stat-delta delta-up">Insights extracted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEF3C7">
+          <svg viewBox="0 0 16 16" fill="#D97706"><circle cx="8" cy="5" r="3" opacity=".5"/><path d="M2 13.5c0-3.3 2.7-6 6-6s6 2.7 6 6H2z"/></svg>
+        </div>
+        <div class="stat-value">${stories}</div>
+        <div class="stat-label">Personal Stories</div>
+        <div class="stat-delta" style="color:var(--warning)">In memory</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEE2E2">
+          <svg viewBox="0 0 16 16" fill="#DC2626"><path d="M14 8A6 6 0 112 8a6 6 0 0112 0zM8 3a5 5 0 100 10A5 5 0 008 3z" opacity=".4"/><circle cx="8" cy="8" r="2"/></svg>
+        </div>
+        <div class="stat-value">${compAssets}</div>
+        <div class="stat-label">Competitor Assets</div>
+        <div class="stat-delta text-danger">Being monitored</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EDE9FE">
+          <svg viewBox="0 0 16 16" fill="#7C3AED"><path d="M2 2h12v1H2V2zm2 3h8v1H4V5zm-2 3h12v1H2V8zm2 3h6v1H4v-1z" opacity=".6"/></svg>
+        </div>
+        <div class="stat-value">${cp.length}</div>
+        <div class="stat-label">Content Pieces Generated</div>
+        <div class="stat-delta" style="color:#7C3AED">AI-generated</div>
+      </div>
+    </div>
+
+    <div class="grid-3-2" style="gap:18px">
+      <div>
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#2563EB"><path d="M8 2v12M2 8h12" stroke="#2563EB" stroke-width="2.2"/></svg>
+            <div>
+              <div class="card-title">Quick Actions</div>
+              <div class="card-subtitle">One-click workflows</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="qa-grid">
+              <div class="qa-btn" onclick="quickAction('linkedin')">
+                <div class="qa-icon" style="background:#EFF6FF"><svg width="15" height="15" viewBox="0 0 16 16" fill="#2563EB"><rect x="1" y="1" width="5" height="5" rx="1"/><path d="M1 8h3v7H1zM6 5.5a2.5 2.5 0 012.5-2.5H11a4 4 0 014 4V15H11V8.5A1.5 1.5 0 009.5 7h0A1.5 1.5 0 008 8.5V15H6V5.5z"/></svg></div>
+                <div><div class="qa-label">LinkedIn Post</div><div class="qa-desc">AI-generated</div></div>
+              </div>
+              <div class="qa-btn" onclick="quickAction('reel')">
+                <div class="qa-icon" style="background:#FEE2E2"><svg width="15" height="15" viewBox="0 0 16 16" fill="#DC2626"><rect x="1" y="3" width="10" height="10" rx="1.5" fill="none" stroke="#DC2626" stroke-width="1.5"/><polygon points="7,7 11,9.5 7,12" fill="#DC2626"/><rect x="13" y="5" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/></svg></div>
+                <div><div class="qa-label">Reel Script</div><div class="qa-desc">30–60 sec</div></div>
+              </div>
+              <div class="qa-btn" onclick="quickAction('newsletter')">
+                <div class="qa-icon" style="background:#F0FDF4"><svg width="15" height="15" viewBox="0 0 16 16" fill="#059669"><path d="M1 3h14v10H1V3zm0 0l7 6 7-6" fill="none" stroke="#059669" stroke-width="1.5"/></svg></div>
+                <div><div class="qa-label">Newsletter</div><div class="qa-desc">Email edition</div></div>
+              </div>
+              <div class="qa-btn" onclick="navigate('sales-analyzer')">
+                <div class="qa-icon" style="background:#FFF7ED"><svg width="15" height="15" viewBox="0 0 16 16" fill="#D97706"><path d="M1 2h14v2H1V2zm0 4h14v1H1V6zm0 3h8v1H1V9z"/><path d="M13 10l2 2-2 2v-1.5h-3v-1h3V10z"/></svg></div>
+                <div><div class="qa-label">Analyze Call</div><div class="qa-desc">Extract insights</div></div>
+              </div>
+              <div class="qa-btn" onclick="navigate('calendar')">
+                <div class="qa-icon" style="background:#EDE9FE"><svg width="15" height="15" viewBox="0 0 16 16" fill="#7C3AED"><rect x="1" y="3" width="14" height="12" rx="1.5" fill="none" stroke="#7C3AED" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="#7C3AED" stroke-width="1.5"/></svg></div>
+                <div><div class="qa-label">Calendar</div><div class="qa-desc">Generate 30-day</div></div>
+              </div>
+              <div class="qa-btn" onclick="navigate('knowledge')">
+                <div class="qa-icon" style="background:#F3E8FF"><svg width="15" height="15" viewBox="0 0 16 16" fill="#7E22CE"><path d="M2 2h12v12H2V2zm1 1v10h10V3H3z"/><path d="M5 5h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/></svg></div>
+                <div><div class="qa-label">Upload Doc</div><div class="qa-desc">Knowledge Vault</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#6B7280"><circle cx="8" cy="8" r="6" fill="none" stroke="#6B7280" stroke-width="1.3"/><path d="M8 5v4l2.5 1.5" stroke="#6B7280" stroke-width="1.3"/></svg>
+            <div>
+              <div class="card-title">Recent Activity</div>
+              <div class="card-subtitle">Your latest actions across Scalvora OS</div>
+            </div>
+          </div>
+          <div class="card-body" style="padding-top:8px;padding-bottom:8px">
+            ${recent.length === 0 ? `<div class="empty-state" style="padding:30px 20px">
+              <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3"/></svg></div>
+              <div class="empty-title">No activity yet</div>
+              <div class="empty-desc">Start by uploading documents to the Knowledge Vault or generating your first piece of content.</div>
+            </div>` : `<div class="activity-list">${recent.map(a => {
+              const icons = {
+                upload: ['#EFF6FF','#2563EB','<path d="M8 3v8M4.5 7l3.5-4 3.5 4" stroke="#2563EB" stroke-width="1.4"/>'],
+                call: ['#FFF7ED','#D97706','<path d="M1 2h14v2H1V2zm0 4h14v1H1V6zm0 3h8v1H1V9z"/><path d="M13 10l2 2-2 2v-1.5h-3v-1h3V10z" fill="#D97706"/>'],
+                content: ['#EDE9FE','#7C3AED','<path d="M2 2h12v1H2V2zm2 3h8v1H4V5zm-2 3h12v1H2V8zm2 3h6v1H4v-1z"/>']
+              };
+              const [bg,clr,ic] = icons[a.type] || icons.upload;
+              return `<div class="activity-item">
+                <div class="activity-dot" style="background:${bg}">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="${clr}">${ic}</svg>
+                </div>
+                <div>
+                  <div class="activity-text">${a.label}</div>
+                  <div style="font-size:11.5px;color:var(--text-light);margin-top:2px">${a.cat} · ${formatDate(a.time)}</div>
+                </div>
+              </div>`;
+            }).join('')}</div>`}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Brand Health -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <div>
+              <div class="card-title">OS Health</div>
+              <div class="card-subtitle">How complete is your second brain</div>
+            </div>
+          </div>
+          <div class="card-body">
+            ${['personal','scalvora','knowledge','competitors','salesCalls'].map((k,i) => {
+              const labels = ['Personal Brand','Scalvora Brand','Knowledge Vault','Competitor Intel','Sales Calls'];
+              const d = DB.get(k);
+              let pct = 0;
+              if(k==='personal'){ const fields = Object.values(d||{}); const filled = fields.filter(v=>v&&v.trim()).length; pct = Math.round((filled/fields.length)*100); }
+              else if(k==='scalvora'){ const fields = Object.values(d||{}); const filled = fields.filter(v=>v&&v.trim()).length; pct = Math.round((filled/fields.length)*100); }
+              else { pct = Math.min(100, ((d||[]).length / 5) * 100); }
+              const clr = pct >= 80 ? '#059669' : pct >= 40 ? '#D97706' : '#2563EB';
+              return `<div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="font-size:12.5px;font-weight:500;color:var(--primary)">${labels[i]}</span>
+                  <span style="font-size:12px;color:var(--text-muted)">${pct}%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${clr}"></div></div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Scalvora Quick Info -->
+        <div class="card" style="background:linear-gradient(135deg,#0D1117 0%,#1e2d4a 100%);border:none">
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <div class="logo-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M2 8L8 2L14 8L8 14L2 8Z" fill="white" opacity=".9"/><path d="M8 5L11 8L8 11L5 8L8 5Z" fill="white"/></svg></div>
+              <div style="font-family:var(--font-head);font-weight:700;color:#fff;font-size:15px">Scalvora</div>
+            </div>
+            <div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;margin-bottom:14px">${DB.get('scalvora',DEFAULT.scalvora).mission}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${DB.get('scalvora',DEFAULT.scalvora).vocabulary.split(',').slice(0,4).map(v=>`<span style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500">${v.trim()}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function quickAction(type) {
+  const ctx = buildMasterContext();
+  const prompts = {
+    linkedin: `You are a world-class LinkedIn ghostwriter.\n\n${ctx}\n\nWrite a high-performing LinkedIn post for Narender Yadav about his expertise in AI-powered outbound systems and agency building. Use his voice: direct, founder-led, no fluff. Use a strong hook that stops the scroll. Include a specific insight or framework. End with a clear CTA. Max 200 words. No hashtags unless very strategic.`,
+    reel: `You are an expert short-form video scriptwriter.\n\n${ctx}\n\nWrite a 45-second Instagram Reel script for Narender Yadav. Topic: How AI is changing outbound lead generation for agencies. Format: Hook (5s) → Problem (10s) → Solution reveal (15s) → Proof point (10s) → CTA (5s). Add [VISUAL] directions. Make it punchy.`,
+    newsletter: `You are an expert newsletter writer.\n\n${ctx}\n\nWrite one edition of Narender's newsletter. Subject line + opening hook + 1 core insight about AI-powered GTM + 1 mini case study + actionable takeaway + Scalvora CTA. ~400 words. Conversational but authoritative. Not preachy.`
+  };
+
+  const modal_id = `quick_${type}`;
+  showModal(
+    type === 'linkedin' ? 'LinkedIn Post Generator' : type === 'reel' ? 'Reel Script Generator' : 'Newsletter Generator',
+    `<div class="info-box mb-4">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2A1 1 0 018 4zm0 3h1v5H7V7h1z"/></svg>
+      Generating using your Personal Brand, Scalvora context, and all stored intelligence…
+    </div>
+    <div id="output_${type}"><div style="padding:32px;text-align:center">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text-muted)">Writing with your voice…</div>
+    </div></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+     <button class="btn btn-primary" onclick="copyOutput('${type}')">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="5" y="5" width="9" height="9" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3 1h8a1 1 0 011 1v2H2V2a1 1 0 011-1z" opacity=".5"/></svg>
+      Copy Output</button>`,
+    'modal-lg'
+  );
+
+  try {
+    const result = await callClaude(prompts[type]);
+    const el = document.getElementById(`output_${type}`);
+    if (el) {
+      el.innerHTML = `<div class="ai-output">
+        <div class="ai-output-label"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 8.5L7 10l3.5-4" stroke="currentColor" stroke-width="1.3"/></svg> AI Generated · Using your full brand context</div>
+        <div class="ai-output-content" id="copy_target_${type}">${result}</div>
+      </div>`;
+      // Save to content pieces
+      const cp = DB.get('contentPieces', []);
+      cp.unshift({ id: Date.now(), type: type === 'linkedin' ? 'LinkedIn Post' : type === 'reel' ? 'Reel Script' : 'Newsletter', topic: 'Quick Generate', content: result, date: new Date().toISOString() });
+      DB.set('contentPieces', cp);
+    }
+  } catch(e) {
+    const el = document.getElementById(`output_${type}`);
+    if (el) el.innerHTML = `<div style="padding:20px;color:var(--danger)">⚠️ ${e.message}. <a href="#" onclick="navigate('settings');closeModal()">Add your API key in Settings</a></div>`;
+  }
+}
+
+function copyOutput(id) {
+  const el = document.getElementById(`copy_target_${id}`);
+  if (el) { navigator.clipboard.writeText(el.textContent); toast('Copied to clipboard!', 'success'); }
+}
+
+// ============================================================
+// KNOWLEDGE VAULT
+// ============================================================
+function renderKnowledge(el, actions) {
+  const kv = DB.get('knowledge', []);
+  const categories = ['Sales Calls','Discovery Calls','Client Meetings','Cold Call Notes','VSLs','Offer Documents','Website Copy','Case Studies','Testimonials','Client Wins','Cold Emails','Newsletters','Books','Research','Frameworks','Personal Stories','Competitor Content'];
+
+  actions.innerHTML = `
+    <div class="search-bar">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.4 10l3.3 3.3-1.4 1.4L10 11.4A6 6 0 1110 3a6 6 0 011.4 7zM6 10A4 4 0 106 2a4 4 0 000 8z"/></svg>
+      <input type="text" class="form-input" placeholder="Search knowledge vault…" id="kv-search" oninput="filterKV()" style="width:220px">
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="showAddKV()">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg>
+      Add Document</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Knowledge Vault</div>
+        <div class="section-desc">All your business intelligence in one place. ${kv.length} document${kv.length!==1?'s':''} stored.</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      ${categories.slice(0,6).map(cat => {
+        const count = kv.filter(d=>d.category===cat).length;
+        return `<div class="stat-card" style="padding:12px 16px;cursor:pointer" onclick="filterByCategory('${cat}')">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:600;color:var(--primary)">${cat}</span>
+            <span style="font-family:var(--font-head);font-weight:700;font-size:18px;color:var(--accent)">${count}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between">
+        <div><div class="card-title">All Documents</div></div>
+        <select class="form-select" style="width:160px;font-size:12px" onchange="filterKVCat(this.value)" id="cat-filter">
+          <option value="">All Categories</option>
+          ${categories.map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div id="kv-list"></div>
+    </div>
+  `;
+  // Mount after innerHTML is set (renderKVList now returns DOM element for non-empty)
+  mountKVList(document.getElementById('kv-list'), kv);
+}
+
+function renderKVList(docs) {
+  if (docs.length === 0) return `<div class="empty-state">
+    <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 2v8h8V4H4zm1 1h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/></svg></div>
+    <div class="empty-title">No documents yet</div>
+    <div class="empty-desc">Upload your first document — sales calls, emails, case studies, books, research — to start building your second brain.</div>
+    <button class="btn btn-primary btn-sm" onclick="showAddKV()">Upload First Document</button>
+  </div>`;
+
+  const rows = docs.map(d => {
+    const tr = document.createElement('tr');
+    const summary = d.summary ? d.summary.slice(0,80) + '…' : '';
+    const tags = (d.tags||'').split(',').filter(t=>t.trim()).map(t=>`<span class="tag">${escapeHtml(t.trim())}</span>`).join('');
+    tr.innerHTML = `
+      <td>
+        <div style="font-weight:600;font-size:13px;color:var(--primary)">${escapeHtml(d.title)}</div>
+        ${summary ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${escapeHtml(summary)}</div>` : ''}
+      </td>
+      <td><span class="cat-badge ${getCatClass(d.category)}">${escapeHtml(d.category)}</span></td>
+      <td><div class="tag-group">${tags}</div></td>
+      <td style="color:var(--text-muted);font-size:12px">${formatDate(d.date)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm kv-view-btn" data-id="${escapeHtml(d.id)}">View</button>
+          <button class="btn btn-ghost btn-sm kv-del-btn" style="color:var(--danger)" data-id="${escapeHtml(d.id)}">Delete</button>
+        </div>
+      </td>`;
+    return tr;
+  });
+
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  table.innerHTML = '<thead><tr><th>Title</th><th>Category</th><th>Tags</th><th>Date</th><th>Actions</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  rows.forEach(r => tbody.appendChild(r));
+  table.appendChild(tbody);
+
+  // Use a wrapper div so we can return an element reference trick
+  const wrap = document.createElement('div');
+  wrap.appendChild(table);
+  // Attach delegated listeners
+  tbody.addEventListener('click', e => {
+    const viewBtn = e.target.closest('.kv-view-btn');
+    const delBtn  = e.target.closest('.kv-del-btn');
+    if (viewBtn) viewDoc(viewBtn.dataset.id);
+    if (delBtn)  deleteDoc(delBtn.dataset.id);
+  });
+  return wrap;
+}
+
+function getCatClass(cat) {
+  const map = {'Sales Calls':'sales','Offer Documents':'offer','Newsletters':'newsletter','Research':'research','Competitor Content':'competitor','Personal Stories':'personal','Testimonials':'testimonial','Books':'book','VSLs':'sales','Client Wins':'testimonial','Case Studies':'testimonial'};
+  return map[cat] || '';
+}
+
+function mountKVList(container, docs) {
+  if (!container) return;
+  container.innerHTML = '';
+  const result = renderKVList(docs);
+  if (typeof result === 'string') container.innerHTML = result;
+  else container.appendChild(result);
+}
+
+function filterKV() {
+  const q = document.getElementById('kv-search')?.value.toLowerCase()||'';
+  const kv = DB.get('knowledge', []).filter(d => d.title.toLowerCase().includes(q) || (d.summary||'').toLowerCase().includes(q) || (d.tags||'').toLowerCase().includes(q));
+  mountKVList(document.getElementById('kv-list'), kv);
+}
+
+function filterKVCat(cat) {
+  const kv = cat ? DB.get('knowledge', []).filter(d => d.category === cat) : DB.get('knowledge', []);
+  mountKVList(document.getElementById('kv-list'), kv);
+}
+
+function filterByCategory(cat) {
+  const sel = document.getElementById('cat-filter');
+  if (sel) { sel.value = cat; filterKVCat(cat); }
+}
+
+function showAddKV() {
+  const categories = ['Sales Calls','Discovery Calls','Client Meetings','Cold Call Notes','VSLs','Offer Documents','Website Copy','Case Studies','Testimonials','Client Wins','Cold Emails','Newsletters','Books','Research','Frameworks','Personal Stories','Competitor Content'];
+  showModal('Add to Knowledge Vault',
+    `<div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="pill-tab active" id="kv-tab-paste" onclick="kvSwitchTab('paste')">Paste Text</button>
+      <button class="pill-tab" id="kv-tab-file" onclick="kvSwitchTab('file')">Upload File</button>
+    </div>
+
+    <div id="kv-paste-panel">
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input class="form-input" id="kv-title" placeholder="e.g. Client Discovery Call – TechFlow Agency">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="kv-cat">${categories.map(c=>`<option>${c}</option>`).join('')}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <input class="form-input" id="kv-tags" placeholder="outbound, agency, cold-email">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Content / Transcript *</label>
+        <textarea class="form-textarea" id="kv-content" style="min-height:140px" placeholder="Paste the document content, transcript, or notes here…"></textarea>
+      </div>
+    </div>
+
+    <div id="kv-file-panel" class="hidden">
+      <div class="upload-zone" id="kv-dropzone" onclick="document.getElementById('kv-file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="kvHandleDrop(event)">
+        <div class="upload-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2v8M5 5l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg></div>
+        <div class="upload-text"><strong>Click to browse</strong> or drag & drop</div>
+        <div class="upload-types">PDF · DOCX · TXT · PPT · CSV · MD — up to 10MB</div>
+      </div>
+      <input type="file" id="kv-file-input" accept=".pdf,.docx,.doc,.txt,.ppt,.pptx,.csv,.md" class="hidden" onchange="kvHandleFile(this.files[0])">
+      <div id="kv-file-status" class="hidden"></div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="kv-cat-file">${categories.map(c=>`<option>${c}</option>`).join('')}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <input class="form-input" id="kv-tags-file" placeholder="outbound, agency, cold-email">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:4px">
+      <label class="form-label">Summary (optional)</label>
+      <input class="form-input" id="kv-summary" placeholder="Leave blank to write your own after saving">
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveKV()">Save to Vault</button>`
+  );
+}
+
+function kvSwitchTab(tab) {
+  const isPaste = tab === 'paste';
+  document.getElementById('kv-tab-paste').classList.toggle('active', isPaste);
+  document.getElementById('kv-tab-file').classList.toggle('active', !isPaste);
+  document.getElementById('kv-paste-panel').classList.toggle('hidden', !isPaste);
+  document.getElementById('kv-file-panel').classList.toggle('hidden', isPaste);
+  window._kvActiveTab = tab;
+}
+
+function kvHandleDrop(e) {
+  e.preventDefault();
+  document.getElementById('kv-dropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) kvHandleFile(file);
+}
+
+async function kvHandleFile(file) {
+  if (!file) return;
+  const status = document.getElementById('kv-file-status');
+  status.classList.remove('hidden');
+  status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h5l4 4v10H4V1zm5 0v4h4"/></svg><span style="flex:1">Reading <strong>${file.name}</strong>…</span><div class="loading-dots" style="margin-left:auto"><span></span><span></span><span></span></div></div>`;
+
+  try {
+    const text = await extractFileText(file);
+    window._kvFileContent = text;
+    window._kvFileName = file.name;
+    // Auto-fill title from filename
+    const titleInput = document.getElementById('kv-title') || { value: '' };
+    const autoTitle = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="#059669"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 5.5L7 11 4.5 8.5l1-1 1.5 1.5 3.5-4 1 .5z"/></svg><div style="flex:1"><div style="font-weight:600;font-size:13px">${file.name}</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:1px">${Math.round(text.length/1000)}k characters extracted</div></div></div>`;
+    // Add a title input in file panel
+    const titleRow = document.createElement('div');
+    titleRow.className = 'form-group'; titleRow.style.marginTop = '10px';
+    titleRow.innerHTML = `<label class="form-label">Title</label><input class="form-input" id="kv-title-file" value="${autoTitle}" placeholder="Document title">`;
+    if (!document.getElementById('kv-title-file')) status.after(titleRow);
+  } catch(err) {
+    status.innerHTML = `<div class="file-chip" style="background:#FEE2E2;border-color:#FCA5A5"><svg viewBox="0 0 16 16" fill="#DC2626"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7v-2h2v2zm0-4H7V4h2v3z"/></svg><span style="color:#DC2626">${err.message}</span></div>`;
+  }
+}
+
+async function extractFileText(file) {
+  const name = file.name.toLowerCase();
+  const maxBytes = 10 * 1024 * 1024;
+  if (file.size > maxBytes) throw new Error('File too large (max 10MB)');
+
+  if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv')) {
+    return await file.text();
+  }
+
+  if (name.endsWith('.pdf')) {
+    return await extractPdfText(file);
+  }
+
+  if (name.endsWith('.docx') || name.endsWith('.doc')) {
+    return await extractDocxText(file);
+  }
+
+  if (name.endsWith('.pptx') || name.endsWith('.ppt')) {
+    return await extractPptxText(file);
+  }
+
+  // Fallback: try reading as text
+  try { return await file.text(); }
+  catch { throw new Error(`Unsupported file type: ${name.split('.').pop()}`); }
+}
+
+async function extractPdfText(file) {
+  // Use PDF.js from CDN if available, else base64 send to API
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const bytes = new Uint8Array(e.target.result);
+        // Try simple text extraction from PDF bytes (works for text-based PDFs)
+        let text = '';
+        const str = new TextDecoder('latin1').decode(bytes);
+        // Extract text between BT and ET (PDF text blocks)
+        const textBlocks = str.match(/BT[\s\S]*?ET/g) || [];
+        for (const block of textBlocks) {
+          const parts = block.match(/\(([^)]+)\)/g) || [];
+          for (const p of parts) text += p.slice(1,-1).replace(/\\n/g,'\n').replace(/\\/g,'') + ' ';
+        }
+        // Also try extracting readable ASCII strings
+        if (text.trim().length < 100) {
+          const ascii = str.replace(/[^\x20-\x7E\n\r\t]/g,' ').replace(/\s{3,}/g, '\n').trim();
+          const lines = ascii.split('\n').filter(l => l.trim().length > 20 && /[a-zA-Z]{3,}/.test(l));
+          text = lines.join('\n');
+        }
+        if (text.trim().length < 50) {
+          resolve(`[PDF: ${file.name}]\n\nCould not auto-extract text from this PDF (likely scanned/image-based). Please paste the content manually in the "Paste Text" tab instead.`);
+        } else {
+          resolve(`[PDF: ${file.name}]\n\n${text.trim()}`);
+        }
+      } catch(err) { reject(new Error('Could not read PDF. Try pasting text instead.')); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractDocxText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        // DOCX is a ZIP — extract word/document.xml
+        const bytes = new Uint8Array(e.target.result);
+        // Look for XML content between zip entries
+        const str = new TextDecoder('latin1').decode(bytes);
+        // Find document.xml content
+        const xmlMatch = str.match(/word\/document\.xml[\s\S]{0,50}([\s\S]*?)PK/);
+        let text = '';
+        if (xmlMatch) {
+          // Strip XML tags and extract text
+          text = xmlMatch[1].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        }
+        // Fallback: extract all readable text from the file
+        if (text.length < 50) {
+          const readable = str.replace(/[^\x20-\x7E\n]/g,' ').replace(/\s{3,}/g,'\n');
+          const lines = readable.split('\n').filter(l => l.trim().length > 15 && /[a-zA-Z]{3,}/.test(l) && !l.includes('PK') && !l.includes('xml') && !l.includes('Content_Types'));
+          text = lines.join('\n');
+        }
+        if (text.trim().length < 30) {
+          resolve(`[DOCX: ${file.name}]\n\nCould not extract text automatically. Please paste the content in the "Paste Text" tab.`);
+        } else {
+          resolve(`[DOCX: ${file.name}]\n\n${text.trim()}`);
+        }
+      } catch(err) { reject(new Error('Could not read DOCX file.')); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractPptxText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const str = new TextDecoder('latin1').decode(new Uint8Array(e.target.result));
+        // Extract text from slide XML files
+        const slideMatches = str.match(/ppt\/slides\/slide\d+\.xml[\s\S]{0,30}([\s\S]*?)PK/g) || [];
+        let text = '';
+        for (const slide of slideMatches) {
+          const clean = slide.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').replace(/[^\x20-\x7E]/g,'').trim();
+          if (clean.length > 10) text += clean + '\n\n';
+        }
+        if (text.trim().length < 30) {
+          resolve(`[PPTX: ${file.name}]\n\nCould not auto-extract slides. Please paste content manually.`);
+        } else {
+          resolve(`[PPTX: ${file.name}]\n\n${text.trim()}`);
+        }
+      } catch { reject(new Error('Could not read PPTX file.')); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function saveKV() {
+  const isFile = window._kvActiveTab === 'file';
+  const title = (isFile
+    ? document.getElementById('kv-title-file')?.value.trim()
+    : document.getElementById('kv-title')?.value.trim()) || '';
+  const category = (isFile
+    ? document.getElementById('kv-cat-file')?.value
+    : document.getElementById('kv-cat')?.value) || 'Research';
+  const tags = (isFile
+    ? document.getElementById('kv-tags-file')?.value.trim()
+    : document.getElementById('kv-tags')?.value.trim()) || '';
+  const content = isFile
+    ? (window._kvFileContent || '')
+    : (document.getElementById('kv-content')?.value.trim() || '');
+  const summary = document.getElementById('kv-summary')?.value.trim() || '';
+
+  if (!content) { toast(isFile ? 'No file uploaded yet' : 'Content is required', 'error'); return; }
+  if (!title) { toast('Please enter a title', 'error'); return; }
+
+  const kv = DB.get('knowledge', []);
+  kv.unshift({ id: 'kv_' + Date.now(), title, category, content, tags, summary: summary || content.slice(0,150) + '…', date: new Date().toISOString() });
+  DB.setDoc('knowledge', kv);
+  window._kvFileContent = null; window._kvFileName = null; window._kvActiveTab = null;
+  updateKVBadge();
+  toast('Saved to vault!', 'success');
+  closeModal();
+  if (currentPage === 'knowledge') render();
+}
+
+function viewDoc(id) {
+  const doc = DB.get('knowledge', []).find(d => d.id === id);
+  if (!doc) return;
+  showModal(doc.title,
+    `<div style="margin-bottom:14px"><span class="cat-badge ${getCatClass(doc.category)}">${doc.category}</span></div>
+    ${doc.summary ? `<div class="ai-output" style="margin-bottom:16px"><div class="ai-output-label">Summary</div><div class="ai-output-content">${doc.summary}</div></div>` : ''}
+    <div style="font-size:13.5px;color:var(--primary);line-height:1.7;white-space:pre-wrap;max-height:350px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:14px">${doc.content}</div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+     <button class="btn btn-primary" onclick="useInStudio('${id}')">Use in Content Studio</button>`,
+    'modal-lg'
+  );
+}
+
+function useInStudio(id) {
+  closeModal();
+  navigate('content-studio');
+  setTimeout(() => {
+    const doc = DB.get('knowledge', []).find(d => d.id === id);
+    if (doc) toast(`Loaded "${doc.title}" into Content Studio`, 'success');
+  }, 300);
+}
+
+function deleteDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  const kv = DB.get('knowledge', []).filter(d => d.id !== id);
+  DB.set('knowledge', kv);
+  updateKVBadge();
+  toast('Document deleted', 'default');
+  render();
+}
+
+// ============================================================
+// PERSONAL BRAND CENTER
+// ============================================================
+function renderPersonal(el, actions) {
+  const p = DB.get('personal', DEFAULT.personal);
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="savePersonal()">Save Changes</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Personal Brand Center</div>
+        <div class="section-desc">Train AI to write with your voice, stories, and philosophy.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:18px;align-items:start">
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Your Story</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Full Story</label><textarea class="form-textarea" id="p-fullStory" style="min-height:120px" placeholder="Your full founder story — where you started, the pivots, the journey to Scalvora…">${p.fullStory||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Career Timeline</label><textarea class="form-textarea" id="p-careerTimeline" placeholder="Key career milestones with dates — job, freelancing, agency, etc.">${p.careerTimeline||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Agency Journey</label><textarea class="form-textarea" id="p-agencyJourney" placeholder="How you built Scalvora — the why, the what, the how.">${p.agencyJourney||''}</textarea></div>
+          </div>
+        </div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Wins, Failures & Lessons</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Big Wins</label><textarea class="form-textarea" id="p-bigWins" placeholder="Specific results, revenue milestones, client wins, breakthroughs…">${p.bigWins||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Failures</label><textarea class="form-textarea" id="p-failures" placeholder="The real failures, the bad deals, the pivots that didn't work…">${p.failures||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Lessons Learned</label><textarea class="form-textarea" id="p-lessons" placeholder="What each failure taught you. The frameworks you built from experience…">${p.lessons||''}</textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Beliefs & Philosophy</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Personal Beliefs</label><textarea class="form-textarea" id="p-beliefs" placeholder="What you believe about business, people, systems, growth…">${p.beliefs||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Business Philosophy</label><textarea class="form-textarea" id="p-philosophy" placeholder="Your operating philosophy as a founder and operator…">${p.philosophy||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Core Values</label><textarea class="form-textarea" id="p-coreValues" placeholder="The non-negotiable values that drive your decisions…">${p.coreValues||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Future Vision</label><textarea class="form-textarea" id="p-futureVision" placeholder="Where you're taking Scalvora in the next 3–5 years…">${p.futureVision||''}</textarea></div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Content Voice</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Content Pillars</label><input class="form-input" id="p-contentPillars" value="${p.contentPillars||''}" placeholder="Agency Building, Cold Outreach, AI, Entrepreneurship, Mindset…"></div>
+            <div class="form-group"><label class="form-label">Writing Style</label><textarea class="form-textarea" id="p-writingStyle" placeholder="Direct, founder-led, data-driven, no fluff, uses real examples…">${p.writingStyle||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Content Style</label><textarea class="form-textarea" id="p-contentStyle" placeholder="Short-form insights, storytelling frameworks, contrarian takes…">${p.contentStyle||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Posting Style</label><textarea class="form-textarea" id="p-postingStyle" placeholder="How you typically structure and post content…">${p.postingStyle||''}</textarea></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Influences & References</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Favorite Creators</label><textarea class="form-textarea" id="p-favorites" placeholder="Creators whose style you respect and learn from…">${p.favorites||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Life Goals</label><textarea class="form-textarea" id="p-lifeGoals" placeholder="What you're ultimately building toward — financial, lifestyle, impact…">${p.lifeGoals||''}</textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function savePersonal() {
+  const fields = ['fullStory','careerTimeline','agencyJourney','bigWins','failures','lessons','beliefs','philosophy','coreValues','futureVision','contentPillars','writingStyle','contentStyle','postingStyle','favorites','lifeGoals'];
+  const p = DB.get('personal', DEFAULT.personal);
+  fields.forEach(f => { const el = document.getElementById(`p-${f}`); if(el) p[f] = el.value; });
+  DB.set('personal', p);
+  toast('Personal Brand saved!', 'success');
+}
+
+// ============================================================
+// SCALVORA BRAND CENTER
+// ============================================================
+function renderScalvora(el, actions) {
+  const s = DB.get('scalvora', DEFAULT.scalvora);
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="saveScalvora()">Save Changes</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Scalvora Brand Center</div>
+        <div class="section-desc">Define your agency's identity, voice, and offer so AI never generates generic content.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:18px;align-items:start">
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Brand Foundation</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Mission</label><textarea class="form-textarea" id="s-mission" style="min-height:80px">${s.mission}</textarea></div>
+            <div class="form-group"><label class="form-label">Vision</label><textarea class="form-textarea" id="s-vision" style="min-height:80px">${s.vision}</textarea></div>
+            <div class="form-group"><label class="form-label">Target Audience</label><textarea class="form-textarea" id="s-targetAudience">${s.targetAudience}</textarea></div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Brand Voice</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Voice Attributes</label><input class="form-input" id="s-voice" value="${s.voice}" placeholder="Premium, Strategic, Operator-Led…"></div>
+            <div class="form-group"><label class="form-label">Vocabulary to USE</label><textarea class="form-textarea" id="s-vocabulary" placeholder="GTM Engine, Revenue Infrastructure, Pipeline System…">${s.vocabulary}</textarea></div>
+            <div class="form-group"><label class="form-label">Vocabulary to AVOID</label><textarea class="form-textarea" id="s-avoid" placeholder="Hustle, Grind, Guru, 10X, Bro Marketing…">${s.avoid}</textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Offers & Services</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Current Offers</label><textarea class="form-textarea" id="s-offers" placeholder="White-label dev for AI automation agencies, FlowLeads PRO…">${s.offers||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Services</label><textarea class="form-textarea" id="s-services" placeholder="What exactly you deliver, scope, deliverables…">${s.services||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Pricing</label><textarea class="form-textarea" id="s-pricing" placeholder="Your pricing structure, packages, payment terms…">${s.pricing||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Guarantee</label><textarea class="form-textarea" id="s-guarantees" placeholder="What you guarantee to clients and how…">${s.guarantees||''}</textarea></div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">GTM & Sales</div></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Methodologies & Frameworks</label><textarea class="form-textarea" id="s-methodologies" placeholder="Your proprietary methods, frameworks, processes that deliver results…">${s.methodologies||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Sales Process</label><textarea class="form-textarea" id="s-salesProcess" placeholder="How you sell — touchpoints, call structure, qualification…">${s.salesProcess||''}</textarea></div>
+            <div class="form-group"><label class="form-label">Case Studies</label><textarea class="form-textarea" id="s-caseStudies" placeholder="Real client results with numbers — before/after, timelines…">${s.caseStudies||''}</textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function saveScalvora() {
+  const fields = ['mission','vision','targetAudience','voice','vocabulary','avoid','offers','services','pricing','guarantees','methodologies','salesProcess','caseStudies'];
+  const s = DB.get('scalvora', DEFAULT.scalvora);
+  fields.forEach(f => { const el = document.getElementById(`s-${f}`); if(el) s[f] = el.value; });
+  DB.set('scalvora', s);
+  toast('Scalvora Brand saved!', 'success');
+}
+
+// ============================================================
+// COMPETITOR INTELLIGENCE
+// ============================================================
+function renderCompetitor(el, actions) {
+  const comps = DB.get('competitors', []);
+  actions.innerHTML = `
+    ${comps.length > 0 ? `<button class="btn btn-ghost btn-sm" onclick="clearDuplicateCompetitors()" style="color:var(--text-muted)">Remove Duplicates</button>` : ''}
+    <button class="btn btn-primary btn-sm" onclick="showAddCompetitor()">+ Add Competitor</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Competitor Intelligence</div>
+        <div class="section-desc">Track and analyze competitors. Extract their best strategies and build better versions.</div>
+      </div>
+    </div>
+
+    ${comps.length === 0 ? `<div class="card"><div class="empty-state">
+      <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 8A6 6 0 112 8a6 6 0 0112 0zM8 3a5 5 0 100 10A5 5 0 008 3zm0 2a3 3 0 110 6A3 3 0 018 5z"/></svg></div>
+      <div class="empty-title">No competitors tracked yet</div>
+      <div class="empty-desc">Add competitor profiles to extract hooks, offers, and positioning — then build better Scalvora versions.</div>
+      <button class="btn btn-primary btn-sm" onclick="showAddCompetitor()">Add First Competitor</button>
+    </div></div>` : '<div class="grid-2" style="gap:16px" id="comp-grid"></div>'}
+  `;
+  // Mount competitor cards as DOM elements (safe — avoids inline onclick corruption)
+  if (comps.length > 0) {
+    const grid = document.getElementById('comp-grid');
+    if (grid) comps.forEach(c => grid.appendChild(renderCompCard(c)));
+  }
+}
+
+function renderCompCard(c) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = 'comp-card-' + c.id;
+
+  const preview = c.content ? escapeHtml(c.content.slice(0,150)) + (c.content.length > 150 ? '…' : '') : '';
+  const positioning = c.positioning ? escapeHtml(c.positioning) : '';
+  const analysisPreview = c.aiAnalysis ? escapeHtml(c.aiAnalysis.slice(0,300)) : '';
+
+  div.innerHTML = `
+    <div class="card-header" style="justify-content:space-between">
+      <div>
+        <div class="card-title">${escapeHtml(c.name)}</div>
+        <div class="card-subtitle">${escapeHtml(c.category || 'Competitor')} · ${formatDate(c.date)}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm comp-analyze-btn" data-id="${c.id}">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 5l4 3-4 3V5z"/></svg>
+          Analyze
+        </button>
+        <button class="btn btn-ghost btn-sm comp-del-btn" style="color:var(--danger)" data-id="${c.id}">Delete</button>
+      </div>
+    </div>
+    <div class="card-body">
+      ${preview ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;padding:8px;background:var(--bg2);border-radius:6px;line-height:1.4">${preview}</div>` : ''}
+      ${positioning ? `<div class="form-group" style="margin-bottom:8px"><label class="form-label">Positioning</label><div style="font-size:13px;color:var(--text-muted)">${positioning}</div></div>` : ''}
+      ${analysisPreview
+        ? `<div class="ai-output" style="margin-top:8px"><div class="ai-output-label">AI Analysis</div><div class="ai-output-content" style="font-size:12.5px">${analysisPreview}… <button class="btn-link comp-full-btn" data-id="${c.id}" style="color:var(--accent);background:none;border:none;cursor:pointer;font-size:12.5px">Read more</button></div></div>`
+        : `<div style="text-align:center;padding:10px 0"><button class="btn btn-ghost btn-sm comp-analyze-btn" data-id="${c.id}" style="color:var(--accent)">Run AI Analysis →</button></div>`}
+    </div>`;
+
+  div.addEventListener('click', e => {
+    const analyzeBtn = e.target.closest('.comp-analyze-btn');
+    const delBtn     = e.target.closest('.comp-del-btn');
+    const fullBtn    = e.target.closest('.comp-full-btn');
+    if (analyzeBtn) analyzeCompetitor(analyzeBtn.dataset.id);
+    if (delBtn)     deleteCompetitor(delBtn.dataset.id);
+    if (fullBtn)    viewFullAnalysis(fullBtn.dataset.id);
+  });
+
+  return div;
+}
+
+function clearDuplicateCompetitors() {
+  const comps = DB.get('competitors', []);
+  const seen = new Set();
+  const unique = comps.filter(c => {
+    const key = c.name.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const removed = comps.length - unique.length;
+  if (removed === 0) { toast('No duplicates found', 'default'); return; }
+  DB.set('competitors', unique);
+  toast(`Removed ${removed} duplicate${removed>1?'s':''}`, 'success');
+  render();
+}
+
+function viewFullAnalysis(id) {
+  const comp = DB.get('competitors', []).find(c => c.id === id);
+  if (!comp?.aiAnalysis) return;
+  showModal(`${comp.name} — AI Analysis`,
+    `<div class="ai-output"><div class="ai-output-label">Full Intelligence Report</div><div class="ai-output-content">${comp.aiAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+     <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('.ai-output-content').textContent);toast('Copied!','success')">Copy</button>`,
+    'modal-lg'
+  );
+}
+
+function showAddCompetitor() {
+  showModal('Add Competitor',
+    `<div class="form-row">
+      <div class="form-group"><label class="form-label">Competitor Name *</label><input class="form-input" id="comp-name" placeholder="e.g. Instantly.ai, Smartlead, BDOW"></div>
+      <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="comp-cat" placeholder="e.g. Outbound SaaS, Agency, Newsletter"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Content Source</label>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="pill-tab active" id="comp-tab-paste" onclick="compSwitchTab('paste')">Paste Text</button>
+        <button class="pill-tab" id="comp-tab-file" onclick="compSwitchTab('file')">Upload File</button>
+      </div>
+      <div id="comp-paste-panel">
+        <textarea class="form-textarea" id="comp-content" style="min-height:120px" placeholder="Paste competitor content, landing page, transcript, emails…"></textarea>
+      </div>
+      <div id="comp-file-panel" class="hidden">
+        <div class="upload-zone" onclick="document.getElementById('comp-file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="compHandleDrop(event)">
+          <div class="upload-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2v8M5 5l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg></div>
+          <div class="upload-text"><strong>Click to browse</strong> or drag &amp; drop</div>
+          <div class="upload-types">PDF · DOCX · TXT · PPT · CSV</div>
+        </div>
+        <input type="file" id="comp-file-input" accept=".pdf,.docx,.doc,.txt,.ppt,.pptx,.csv,.md" class="hidden" onchange="compHandleFile(this.files[0])">
+        <div id="comp-file-status" class="hidden" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Your Positioning Observation</label><textarea class="form-textarea" id="comp-pos" placeholder="How they position themselves — ICP, offer, message…"></textarea></div>
+    <div style="background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--primary)">
+      Save first (instant), then click <strong>Analyze</strong> to run AI extraction — no waiting on save.
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" id="comp-save-btn" onclick="saveCompetitor()">Save Competitor</button>`
+  );
+}
+
+function compSwitchTab(tab) {
+  const isPaste = tab === 'paste';
+  document.getElementById('comp-tab-paste').classList.toggle('active', isPaste);
+  document.getElementById('comp-tab-file').classList.toggle('active', !isPaste);
+  document.getElementById('comp-paste-panel').classList.toggle('hidden', !isPaste);
+  document.getElementById('comp-file-panel').classList.toggle('hidden', isPaste);
+  window._compActiveTab = tab;
+}
+
+function compHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) compHandleFile(file);
+}
+
+async function compHandleFile(file) {
+  if (!file) return;
+  const status = document.getElementById('comp-file-status');
+  status.classList.remove('hidden');
+  status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h5l4 4v10H4V1zm5 0v4h4"/></svg><span style="flex:1">Reading <strong>${file.name}</strong>...</span><div class="loading-dots" style="margin-left:auto"><span></span><span></span><span></span></div></div>`;
+  try {
+    const text = await extractFileText(file);
+    window._compFileContent = text;
+    status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="#059669"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 5.5L7 11 4.5 8.5l1-1 1.5 1.5 3.5-4 1 .5z"/></svg><div style="flex:1"><div style="font-weight:600;font-size:13px">${file.name}</div><div style="font-size:11.5px;color:var(--text-muted)">${Math.round(text.length/1000)}k chars extracted</div></div></div>`;
+  } catch(err) {
+    status.innerHTML = `<div class="file-chip" style="background:#FEE2E2;border-color:#FCA5A5"><svg viewBox="0 0 16 16" fill="#DC2626"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7v-2h2v2zm0-4H7V4h2v3z"/></svg><span style="color:#DC2626">${err.message}</span></div>`;
+  }
+}
+
+function saveCompetitor() {
+  const name = document.getElementById('comp-name')?.value.trim();
+  const category = document.getElementById('comp-cat')?.value.trim();
+  const isFile = window._compActiveTab === 'file';
+  const content = isFile
+    ? (window._compFileContent || '')
+    : (document.getElementById('comp-content')?.value.trim() || '');
+  const positioning = document.getElementById('comp-pos')?.value.trim() || '';
+
+  if (!name) { toast('Competitor name required', 'error'); return; }
+  if (!content) { toast(isFile ? 'No file uploaded yet' : 'Add some content to analyze', 'error'); return; }
+
+  const comps = DB.get('competitors', []);
+  comps.unshift({ id: 'comp_' + Date.now(), name, category, content, positioning, aiAnalysis: '', date: new Date().toISOString() });
+  DB.setDoc('competitors', comps);
+  window._compFileContent = null;
+  window._compActiveTab = null;
+  toast('Competitor saved! Click Analyze to run AI extraction.', 'success');
+  closeModal();
+  if (currentPage === 'competitor') render();
+}
+
+async function analyzeCompetitor(id) {
+  const comp = DB.get('competitors', []).find(c => c.id === id);
+  if (!comp || !comp.content) { toast('No content to analyze', 'error'); return; }
+
+  showModal(`Analyzing: ${comp.name}`,
+    `<div style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:10px;font-size:13px;color:var(--text-muted)">Extracting intelligence…</div></div>`,
+    '', 'modal-lg'
+  );
+
+  try {
+    const ctx = buildMasterContext();
+    const result = await callClaude(`${ctx}\n\nNow analyze this competitor and tell me:\n1. Their HOOKS (extract exact formulas, not just examples)\n2. Their STORYTELLING pattern\n3. Their CTAs (exact wording pattern)\n4. Their OFFER STRUCTURE\n5. Their POSITIONING vs Scalvora\n6. Generate a BETTER SCALVORA VERSION of their best performing content\n\nCompetitor: ${comp.name}\n${comp.content.slice(0,4000)}`);
+
+    const comps = DB.get('competitors', []);
+    const idx = comps.findIndex(c => c.id === id);
+    if (idx !== -1) { comps[idx].aiAnalysis = result; DB.set('competitors', comps); }
+
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div class="ai-output"><div class="ai-output-label">Competitor Intelligence Report</div><div class="ai-output-content">${result}</div></div>`;
+    document.querySelector('.modal-footer')?.remove();
+    const modal = document.querySelector('.modal');
+    if (modal) {
+      const footer = document.createElement('div');
+      footer.className = 'modal-footer';
+      footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="navigator.clipboard.writeText(\`${result.replace(/`/g,"'")}\`);toast('Copied!','success')">Copy Report</button>`;
+      modal.appendChild(footer);
+    }
+  } catch(e) {
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div style="padding:20px;color:var(--danger)">Error: ${e.message}</div>`;
+  }
+}
+
+function deleteCompetitor(id) {
+  if (!confirm('Delete this competitor?')) return;
+  DB.set('competitors', DB.get('competitors', []).filter(c => c.id !== id));
+  toast('Competitor deleted', 'default');
+  // Fast DOM removal
+  const card = document.getElementById('comp-card-' + id);
+  if (card) {
+    card.style.transition = 'all .15s';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => { card.remove(); const grid = document.getElementById('comp-grid'); if (grid && !grid.children.length) render(); }, 150);
+  } else { render(); }
+}
+
+// ============================================================
+// SALES CALL ANALYZER
+// ============================================================
+function renderSalesAnalyzer(el, actions) {
+  const calls = DB.get('salesCalls', []);
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="showAnalyzeCall()">Analyze New Call</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Sales Call Analyzer</div>
+        <div class="section-desc">Paste transcripts. Extract pain points, objections, buying signals, and content ideas automatically.</div>
+      </div>
+    </div>
+
+    <div class="grid-3-2" style="gap:18px">
+      <div>
+        <div id="calls-list">
+          ${calls.length === 0 ? `<div class="card"><div class="empty-state">
+            <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2h14v2H1V2zm0 4h14v1H1V6zm0 3h8v1H1V9z"/><path d="M13 10l2 2-2 2v-1.5h-3v-1h3V10z"/></svg></div>
+            <div class="empty-title">No calls analyzed yet</div>
+            <div class="empty-desc">Paste your sales call transcripts and let AI extract every insight, objection, and content idea.</div>
+            <button class="btn btn-primary btn-sm" onclick="showAnalyzeCall()">Analyze First Call</button>
+          </div></div>` : ''}
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Aggregate Insights</div></div>
+          <div class="card-body">
+            ${calls.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Analyze calls to see aggregate intelligence</div>` : `
+            <div style="margin-bottom:14px">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Total Analyzed</div>
+              <div style="font-family:var(--font-head);font-weight:700;font-size:28px;color:var(--primary)">${calls.length}</div>
+            </div>
+            <button class="btn btn-ghost w-full btn-sm" onclick="generateAggregateInsights()" style="justify-content:center">Generate Aggregate Report</button>
+            `}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  // Mount call cards safely as DOM elements
+  if (calls.length > 0) mountCallsList(document.getElementById('calls-list'), calls);
+}
+
+function mountCallsList(container, calls) {
+  if (!container) return;
+  container.innerHTML = '';
+  calls.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'card mb-3';
+    card.innerHTML = `
+      <div class="card-header" style="justify-content:space-between">
+        <div>
+          <div class="card-title">${escapeHtml(c.title)}</div>
+          <div class="card-subtitle">${formatDate(c.date)}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm call-view-btn" data-id="${c.id}">View</button>
+          <button class="btn btn-ghost btn-sm call-del-btn" style="color:var(--danger)" data-id="${c.id}">Delete</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:14px 20px">
+        <div class="grid-2" style="gap:10px">
+          ${c.painPoints ? `<div class="insight-pill" style="background:#FFF7ED"><svg viewBox="0 0 16 16" fill="#D97706" width="15" height="15"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2A1 1 0 018 4zm0 3h1v5H7V7h1z"/></svg><div class="insight-text"><strong>Pain:</strong> ${escapeHtml(c.painPoints.slice(0,100))}…</div></div>` : ''}
+          ${c.objections ? `<div class="insight-pill" style="background:#FEE2E2"><svg viewBox="0 0 16 16" fill="#DC2626" width="15" height="15"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7v-2h2v2zm0-4H7V4h2v3z"/></svg><div class="insight-text"><strong>Objections:</strong> ${escapeHtml(c.objections.slice(0,100))}…</div></div>` : ''}
+        </div>
+      </div>`;
+    card.addEventListener('click', e => {
+      if (e.target.closest('.call-view-btn')) viewCallAnalysis(e.target.closest('.call-view-btn').dataset.id);
+      if (e.target.closest('.call-del-btn'))  deleteCall(e.target.closest('.call-del-btn').dataset.id);
+    });
+    container.appendChild(card);
+  });
+}
+
+function showAnalyzeCall() {
+  showModal('Analyze Sales Call',
+    `<div class="form-group"><label class="form-label">Call Title *</label><input class="form-input" id="call-title" placeholder="e.g. Discovery Call – TechFlow Agency, 12 Jun 2026"></div>
+    <div class="form-group">
+      <label class="form-label">Transcript</label>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="pill-tab active" id="call-tab-paste" onclick="callSwitchTab('paste')">Paste Text</button>
+        <button class="pill-tab" id="call-tab-file" onclick="callSwitchTab('file')">Upload File</button>
+      </div>
+      <div id="call-paste-panel">
+        <textarea class="form-textarea" id="call-content" style="min-height:160px" placeholder="Paste the full call transcript here…&#10;&#10;You: Tell me about your biggest challenge?&#10;Prospect: We're spending $5k/month on ads but not getting qualified leads…"></textarea>
+      </div>
+      <div id="call-file-panel" class="hidden">
+        <div class="upload-zone" onclick="document.getElementById('call-file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="callHandleDrop(event)">
+          <div class="upload-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2v8M5 5l3-3 3 3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg></div>
+          <div class="upload-text"><strong>Click to browse</strong> or drag &amp; drop</div>
+          <div class="upload-types">TXT · PDF · DOCX · MD</div>
+        </div>
+        <input type="file" id="call-file-input" accept=".txt,.pdf,.docx,.doc,.md" class="hidden" onchange="callHandleFile(this.files[0])">
+        <div id="call-file-status" class="hidden" style="margin-top:8px"></div>
+      </div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="runCallAnalysis()">
+       <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 6h4v4H6z" opacity=".5"/></svg>
+       Analyze with AI</button>`,
+    'modal-lg'
+  );
+}
+
+function callSwitchTab(tab) {
+  const isPaste = tab === 'paste';
+  document.getElementById('call-tab-paste').classList.toggle('active', isPaste);
+  document.getElementById('call-tab-file').classList.toggle('active', !isPaste);
+  document.getElementById('call-paste-panel').classList.toggle('hidden', !isPaste);
+  document.getElementById('call-file-panel').classList.toggle('hidden', isPaste);
+  window._callActiveTab = tab;
+}
+
+function callHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) callHandleFile(file);
+}
+
+async function callHandleFile(file) {
+  if (!file) return;
+  const status = document.getElementById('call-file-status');
+  status.classList.remove('hidden');
+  status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h5l4 4v10H4V1zm5 0v4h4"/></svg><span style="flex:1">Reading <strong>${file.name}</strong>...</span><div class="loading-dots" style="margin-left:auto"><span></span><span></span><span></span></div></div>`;
+  try {
+    const text = await extractFileText(file);
+    window._callFileContent = text;
+    // Auto-fill title from filename
+    const titleEl = document.getElementById('call-title');
+    if (titleEl && !titleEl.value) titleEl.value = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    status.innerHTML = `<div class="file-chip"><svg viewBox="0 0 16 16" fill="#059669"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 5.5L7 11 4.5 8.5l1-1 1.5 1.5 3.5-4 1 .5z"/></svg><div style="flex:1"><div style="font-weight:600;font-size:13px">${file.name}</div><div style="font-size:11.5px;color:var(--text-muted)">${Math.round(text.length/1000)}k chars ready to analyze</div></div></div>`;
+  } catch(err) {
+    status.innerHTML = `<div class="file-chip" style="background:#FEE2E2;border-color:#FCA5A5"><svg viewBox="0 0 16 16" fill="#DC2626"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7v-2h2v2zm0-4H7V4h2v3z"/></svg><span style="color:#DC2626">${err.message}</span></div>`;
+  }
+}
+
+async function runCallAnalysis() {
+  const title = document.getElementById('call-title')?.value.trim();
+  const isFile = window._callActiveTab === 'file';
+  const content = isFile
+    ? (window._callFileContent || '')
+    : (document.getElementById('call-content')?.value.trim() || '');
+  if (!title) { toast('Call title required', 'error'); return; }
+  if (!content) { toast(isFile ? 'No file uploaded yet' : 'Paste a transcript first', 'error'); return; }
+
+  const body = document.querySelector('.modal-body');
+  if (body) body.innerHTML = `<div style="padding:40px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:12px;color:var(--text-muted);font-size:13px">Extracting intelligence from call…</div></div>`;
+  document.querySelector('.modal-footer')?.remove();
+
+  try {
+    const prompt = `You are an expert B2B sales analyst. Analyze this sales call transcript and extract structured intelligence.\n\nFormat your response EXACTLY as:\n\n**PAIN POINTS**\n- [list each specific pain with business impact]\n\n**OBJECTIONS**\n- [exact objections raised, even implied ones]\n\n**BUYING SIGNALS**\n- [moments where prospect showed genuine interest]\n\n**FREQUENTLY ASKED QUESTIONS**\n- [questions they asked]\n\n**MARKET LANGUAGE** (exact words prospect used)\n- [phrases that reveal how they think about the problem]\n\n**CONTENT IDEAS**\n- [LinkedIn posts, videos, or newsletters this call inspires]\n\n**OFFER IDEAS**\n- [tweaks or new offers this call suggests]\n\nTranscript:\n${content.slice(0,6000)}`;
+
+    const result = await callClaude(prompt);
+
+    // Parse sections
+    const sections = { painPoints: '', objections: '', buyingSignals: '', marketLanguage: '', contentIdeas: '' };
+    const painMatch = result.match(/\*\*PAIN POINTS\*\*\n([\s\S]*?)(?=\*\*|$)/);
+    const objMatch = result.match(/\*\*OBJECTIONS\*\*\n([\s\S]*?)(?=\*\*|$)/);
+    if (painMatch) sections.painPoints = painMatch[1].trim();
+    if (objMatch) sections.objections = objMatch[1].trim();
+
+    const calls = DB.get('salesCalls', []);
+    const callObj = { id: 'call_' + Date.now(), title, content, ...sections, fullAnalysis: result, date: new Date().toISOString() };
+    calls.unshift(callObj);
+    DB.set('salesCalls', calls);
+
+    if (body) body.innerHTML = `<div class="ai-output"><div class="ai-output-label">Call Analysis Complete</div><div class="ai-output-content" style="font-size:13px">${result.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+    const modal = document.querySelector('.modal');
+    if (modal) {
+      const footer = document.createElement('div');
+      footer.className = 'modal-footer';
+      footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="closeModal();render()">Done</button>`;
+      modal.appendChild(footer);
+    }
+    toast('Call analyzed and saved!', 'success');
+    if (currentPage === 'sales-analyzer') render();
+  } catch(e) {
+    if (body) body.innerHTML = `<div style="padding:20px;color:var(--danger)">Error: ${e.message}</div>`;
+  }
+}
+
+function viewCallAnalysis(id) {
+  const call = DB.get('salesCalls', []).find(c => c.id === id);
+  if (!call) return;
+  showModal(call.title,
+    `<div class="ai-output"><div class="ai-output-label">Full Analysis</div><div class="ai-output-content">${(call.fullAnalysis||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`, 'modal-lg'
+  );
+}
+
+function deleteCall(id) {
+  if (!confirm('Delete this call analysis?')) return;
+  DB.set('salesCalls', DB.get('salesCalls', []).filter(c => c.id !== id));
+  toast('Deleted', 'default');
+  render();
+}
+
+async function generateAggregateInsights() {
+  const calls = DB.get('salesCalls', []);
+  if (calls.length === 0) return;
+
+  showModal('Aggregate Sales Intelligence',
+    `<div style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div></div>`,
+    '', 'modal-lg'
+  );
+
+  try {
+    const combined = calls.map(c => `Call: ${c.title}\n${c.painPoints||''}\n${c.objections||''}`).join('\n\n---\n\n');
+    const result = await callClaude(`Analyze these ${calls.length} sales calls in aggregate and produce:\n\n1. TOP 5 RECURRING PAIN POINTS (with frequency)\n2. TOP 5 OBJECTIONS (with suggested responses)\n3. MARKET LANGUAGE PATTERNS (how prospects describe their problems)\n4. BUYING TRIGGER PATTERNS\n5. TOP 10 CONTENT IDEAS based on these calls\n6. OFFER OPTIMIZATION SUGGESTIONS\n\n${combined.slice(0,6000)}`);
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div class="ai-output"><div class="ai-output-label">Aggregate Intelligence — ${calls.length} Calls</div><div class="ai-output-content">${result.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+    const modal = document.querySelector('.modal');
+    if (modal && !modal.querySelector('.modal-footer')) {
+      const footer = document.createElement('div'); footer.className = 'modal-footer';
+      footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`;
+      modal.appendChild(footer);
+    }
+  } catch(e) {
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div style="padding:20px;color:var(--danger)">Error: ${e.message}</div>`;
+  }
+}
+
+// ============================================================
+// SMART SEARCH
+// ============================================================
+function renderSmartSearch(el, actions) {
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Smart Search</div>
+        <div class="section-desc">Ask anything about your stored intelligence. AI searches across all vaults.</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Ask your second brain anything</label>
+          <div style="display:flex;gap:10px">
+            <input class="form-input" id="ss-query" placeholder="e.g. What objections come up most in my sales calls? What content ideas can I generate from my failures?" style="flex:1">
+            <button class="btn btn-primary" onclick="runSmartSearch()">Ask AI</button>
+          </div>
+        </div>
+        <div class="tag-group">
+          ${['What objections appear most?','What stories can become content?','What lessons have I repeated?','What does my ideal client look like?','What makes Scalvora different?'].map(q => `<span class="tag" style="cursor:pointer" onclick="document.getElementById('ss-query').value='${q}'">${q}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div id="ss-result"></div>
+  `;
+
+  document.getElementById('ss-query')?.addEventListener('keydown', e => { if(e.key==='Enter') runSmartSearch(); });
+}
+
+async function runSmartSearch() {
+  const query = document.getElementById('ss-query')?.value.trim();
+  if (!query) return;
+  const result_el = document.getElementById('ss-result');
+  if (!result_el) return;
+  result_el.innerHTML = `<div class="card"><div class="card-body" style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:10px;color:var(--text-muted);font-size:13px">Searching your entire knowledge base…</div></div></div>`;
+
+  try {
+    const ctx = buildMasterContext();
+    const kv = DB.get('knowledge', []).map(d => `[${d.category}] ${d.title}: ${d.content?.slice(0,500)||''}`).join('\n\n');
+    const sc = DB.get('salesCalls', []).map(c => `Call "${c.title}": ${c.fullAnalysis?.slice(0,500)||''}`).join('\n\n');
+
+    const result = await callClaude(`${ctx}\n\n## ALL KNOWLEDGE VAULT DOCS\n${kv.slice(0,3000)}\n\n## SALES CALL ANALYSES\n${sc.slice(0,2000)}\n\n---\n\nBased on ALL of the above stored intelligence, answer this question from Narender:\n\n"${query}"\n\nBe specific, reference actual stored content where possible, and make the answer immediately actionable.`);
+
+    result_el.innerHTML = `<div class="card">
+      <div class="card-header">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="#2563EB"><path d="M11.4 10l3.3 3.3-1.4 1.4L10 11.4A6 6 0 1110 3a6 6 0 011.4 7zM6 10A4 4 0 106 2a4 4 0 000 8z"/></svg>
+        <div><div class="card-title">${query}</div><div class="card-subtitle">Answer from your stored intelligence</div></div>
+      </div>
+      <div class="card-body">
+        <div class="ai-output"><div class="ai-output-label">AI Response — Searching all vaults</div><div class="ai-output-content">${result.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>
+      </div>
+    </div>`;
+  } catch(e) {
+    result_el.innerHTML = `<div class="card"><div class="card-body" style="color:var(--danger)">${e.message}</div></div>`;
+  }
+}
+
+// ============================================================
+// CONTENT STUDIO
+// ============================================================
+function renderContentStudio(el, actions) {
+  const contentTypes = ['LinkedIn Post','Twitter Thread','Instagram Reel Script','Instagram Carousel','YouTube Script','Newsletter','Lead Magnet','Sales Email','VSL Script','Landing Page Copy'];
+  const tones = ['Direct & Authoritative','Educational','Storytelling','Contrarian','Case Study','How-To','Framework Reveal','Thought Leadership'];
+  const settings = DB.get('settings', DEFAULT.settings);
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Content Studio</div>
+        <div class="section-desc">Generate any content format using your full brand context, voice, and intelligence.</div>
+      </div>
+    </div>
+
+    <div class="grid-3-2" style="gap:18px;align-items:start">
+      <div>
+        <div class="card mb-4">
+          <div class="card-header">
+            <div><div class="card-title">Master Prompt Builder</div><div class="card-subtitle">AI auto-loads your full context</div></div>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Content Type</label>
+                <select class="form-select" id="cs-type">
+                  ${contentTypes.map(t=>`<option>${t}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tone / Angle</label>
+                <select class="form-select" id="cs-tone">
+                  ${tones.map(t=>`<option>${t}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Topic / Idea *</label>
+              <textarea class="form-textarea" id="cs-topic" placeholder="e.g. Why most agencies fail at cold outreach in the first 30 days&#10;e.g. The 3-step framework I use to build GTM systems for agencies&#10;e.g. How we generated 40 qualified calls in 2 weeks for a B2B SaaS client"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Target Audience</label>
+                <input class="form-input" id="cs-audience" value="${settings.defaultAudience||'B2B Agency Owners'}" placeholder="Agency owners, B2B SaaS founders…">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Platform</label>
+                <select class="form-select" id="cs-platform">
+                  <option>LinkedIn</option><option>Instagram</option><option>Twitter/X</option><option>YouTube</option><option>Newsletter</option><option>Website</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Goal</label>
+              <select class="form-select" id="cs-goal">
+                <option>Build authority & trust</option>
+                <option>Generate leads / DMs</option>
+                <option>Drive sales call bookings</option>
+                <option>Grow following</option>
+                <option>Educate audience</option>
+                <option>Promote an offer</option>
+              </select>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#FAFAF8;cursor:pointer" onclick="toggleMasterPrompt()">
+                <div style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--primary)">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="#2563EB"><circle cx="8" cy="8" r="6" fill="none" stroke="#2563EB" stroke-width="1.3"/><path d="M8 5a.75.75 0 01.75.75v2.5a.75.75 0 01-1.5 0v-2.5A.75.75 0 018 5zm0 6a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                  Master Context Preview
+                </div>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" id="mp-chevron"><path d="M4 6l4 4 4-4"/></svg>
+              </div>
+              <div id="master-prompt-preview" class="hidden">
+                <div style="padding:14px;font-size:12px;color:var(--text-muted);font-family:monospace;line-height:1.5;max-height:200px;overflow-y:auto;white-space:pre-wrap;background:#F7F6F3">${buildMasterContext()}</div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-full" onclick="generateContent()" style="justify-content:center;padding:10px">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 5l4 3-4 3V5z"/></svg>
+              Generate Content
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="cs-output">
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v1H2V2zm2 3h8v1H4V5zm-2 3h12v1H2V8zm2 3h6v1H4v-1z"/></svg></div>
+              <div class="empty-title">Your content appears here</div>
+              <div class="empty-desc">Fill in the details and click Generate. AI uses your full brand context.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleMasterPrompt() {
+  const el = document.getElementById('master-prompt-preview');
+  const ch = document.getElementById('mp-chevron');
+  if (el) { el.classList.toggle('hidden'); }
+}
+
+async function generateContent() {
+  const type = document.getElementById('cs-type')?.value;
+  const tone = document.getElementById('cs-tone')?.value;
+  const topic = document.getElementById('cs-topic')?.value.trim();
+  const audience = document.getElementById('cs-audience')?.value;
+  const platform = document.getElementById('cs-platform')?.value;
+  const goal = document.getElementById('cs-goal')?.value;
+
+  if (!topic) { toast('Enter a topic first', 'error'); return; }
+
+  const out = document.getElementById('cs-output');
+  if (out) out.innerHTML = `<div class="card"><div style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:10px;color:var(--text-muted);font-size:13px">Generating ${type} with your full brand context…</div></div></div>`;
+
+  try {
+    const ctx = buildMasterContext();
+    const prompt = `${ctx}
+
+---
+
+Now generate a ${type} for Narender Yadav / Scalvora with these specifications:
+
+TOPIC: ${topic}
+PLATFORM: ${platform}
+TONE: ${tone}
+AUDIENCE: ${audience}
+GOAL: ${goal}
+
+REQUIREMENTS:
+- Write in Narender's voice (direct, founder-led, premium, no fluff)
+- Use Scalvora vocabulary and positioning
+- Reference real frameworks or experiences if stored
+- Include: Hook, Body, CTA
+${type === 'Instagram Carousel' ? '- Format as slides: Slide 1 (hook), Slides 2-7 (content), Slide 8 (CTA)' : ''}
+${type === 'YouTube Script' ? '- Include: Hook (0-30s), Problem (30-90s), Solution, Framework, CTA' : ''}
+${type === 'Twitter Thread' ? '- Format as numbered tweets (1/N through N/N). First tweet = hook.' : ''}
+
+Also provide:
+VISUAL SUGGESTION: [what visual would work best]
+ALT HOOK: [one alternative hook if this doesn't land]`;
+
+    const result = await callClaude(prompt);
+
+    if (out) out.innerHTML = `<div class="card">
+      <div class="card-header" style="justify-content:space-between">
+        <div>
+          <div class="card-title">${type}</div>
+          <div class="card-subtitle">${platform} · ${tone}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('cs-output-text').textContent);toast('Copied!','success')">Copy</button>
+          <button class="btn btn-ghost btn-sm" onclick="saveContentPiece('${type}','${topic}')">Save</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="ai-output">
+          <div class="ai-output-label">Generated Content · ${type}</div>
+          <div class="ai-output-content" id="cs-output-text">${result}</div>
+        </div>
+      </div>
+    </div>`;
+
+    // Auto-save
+    const cp = DB.get('contentPieces', []);
+    cp.unshift({ id: Date.now(), type, topic, platform, tone, content: result, date: new Date().toISOString() });
+    DB.set('contentPieces', cp);
+
+  } catch(e) {
+    if (out) out.innerHTML = `<div class="card"><div class="card-body" style="color:var(--danger)">Error: ${e.message}. <a href="#" onclick="navigate('settings')">Add API key →</a></div></div>`;
+  }
+}
+
+function saveContentPiece(type, topic) {
+  toast('Content saved to library!', 'success');
+}
+
+// ============================================================
+// CONTENT CALENDAR
+// ============================================================
+function renderCalendar(el, actions) {
+  const cal = DB.get('calendar', []);
+  actions.innerHTML = `
+    <select class="form-select" id="cal-days" style="width:130px;font-size:12.5px">
+      <option value="30">30 Day Plan</option>
+      <option value="60">60 Day Plan</option>
+      <option value="90">90 Day Plan</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="generateCalendar()">Generate Calendar</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Content Calendar</div>
+        <div class="section-desc">AI-generated content plans based on your pillars and mix strategy.</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body" style="padding:14px 20px">
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-muted)">CONTENT MIX:</div>
+          <span class="chip chip-blue">40% Authority</span>
+          <span class="chip chip-orange">20% Personal Story</span>
+          <span class="chip chip-green">20% Educational</span>
+          <span class="chip chip-purple">10% Case Studies</span>
+          <span style="font-size:12px;color:var(--text-muted);background:#FEE2E2;color:#991B1B;padding:3px 9px;border-radius:20px;font-weight:500">10% Contrarian</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="cal-grid">
+      ${cal.length > 0 ? renderCalendarGrid(cal) : `<div class="card"><div class="empty-state">
+        <div class="empty-icon"><svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <div class="empty-title">Generate your content calendar</div>
+        <div class="empty-desc">AI creates a personalized posting plan based on your brand pillars, topics, and content mix strategy.</div>
+        <button class="btn btn-primary btn-sm" onclick="generateCalendar()">Generate 30-Day Calendar</button>
+      </div></div>`}
+    </div>
+  `;
+}
+
+function renderCalendarGrid(items) {
+  const typeMap = {Authority:'',Story:'story',Educational:'edu','Case Study':'case',Contrarian:'contrarian'};
+  const weeks = [];
+  for (let i=0; i<Math.min(items.length, 30); i+=7) weeks.push(items.slice(i,i+7));
+  return weeks.map((week,wi) => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Week ${wi+1}</div>
+      <div class="cal-grid">
+        ${'Sun Mon Tue Wed Thu Fri Sat'.split(' ').map((day,di) => {
+          const item = week[di];
+          return `<div class="${item ? 'cal-day has-content' : 'cal-day'}">
+            <div class="cal-day-num">${day}</div>
+            ${item ? `<div class="cal-post ${typeMap[item.type]||''}" title="${item.topic||''}">${item.type}: ${(item.topic||'').slice(0,30)}…</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+async function generateCalendar() {
+  const days = parseInt(document.getElementById('cal-days')?.value || '30');
+  const cal_el = document.getElementById('cal-grid');
+  if (cal_el) cal_el.innerHTML = `<div class="card"><div style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div><div style="margin-top:10px;color:var(--text-muted);font-size:13px">Generating your ${days}-day content calendar…</div></div></div>`;
+
+  try {
+    const ctx = buildMasterContext();
+    const prompt = `${ctx}
+
+Generate a ${days}-day content calendar for Narender Yadav across LinkedIn and Instagram.
+
+CONTENT MIX:
+- 40% Authority posts (GTM insights, outbound frameworks, Scalvora methodology)
+- 20% Personal Story (founder journey, failures, lessons)
+- 20% Educational (how-tos, frameworks, tips)
+- 10% Case Studies (client wins, results)
+- 10% Contrarian (challenge common wisdom in the outbound/GTM space)
+
+For each day, provide ONLY this JSON format (respond with just the JSON array, no markdown):
+[{"day":1,"type":"Authority","topic":"Topic here","platform":"LinkedIn"},{"day":2,...}]
+
+Generate ${days} items covering ${days} days. Mix platforms between LinkedIn and Instagram.`;
+
+    const result = await callClaude(prompt);
+    let items = [];
+    try {
+      const clean = result.replace(/```json|```/g,'').trim();
+      items = JSON.parse(clean);
+    } catch {
+      const match = result.match(/\[[\s\S]*\]/);
+      if (match) items = JSON.parse(match[0]);
+    }
+
+    DB.set('calendar', items);
+    if (cal_el) cal_el.innerHTML = renderCalendarGrid(items);
+    toast(`${days}-day calendar generated!`, 'success');
+  } catch(e) {
+    if (cal_el) cal_el.innerHTML = `<div class="card"><div class="card-body" style="color:var(--danger)">Error: ${e.message}</div></div>`;
+  }
+}
+
+// ============================================================
+// AI AGENTS
+// ============================================================
+function renderAgents(el, actions) {
+  const agents = [
+    { name:'Personal Brand Strategist', desc:'Analyzes your story, wins, and content history to recommend your next 30-day brand growth move.', icon:'👤', color:'#EFF6FF', accent:'#2563EB', prompt:'Act as Narender\'s Personal Brand Strategist. Review all stored intelligence and recommend the highest-leverage brand move for the next 30 days. Be specific, not generic.' },
+    { name:'Scalvora Content Strategist', desc:'Creates LinkedIn and Instagram content calendars aligned with Scalvora\'s GTM goals and audience.', icon:'📊', color:'#EDE9FE', accent:'#7C3AED', prompt:'Act as Scalvora\'s Content Strategist. Based on mission, voice, and stored intelligence, create a content plan that drives qualified leads for the agency.' },
+    { name:'Sales Call Analyst', desc:'Synthesizes all call data to identify your best ICP, top objections, and highest-converting messaging.', icon:'📞', color:'#FFF7ED', accent:'#D97706', prompt:'Act as a Sales Analyst. Review all stored call data and produce: (1) Ideal Client Profile from real signals, (2) Top 5 objections with scripts, (3) Messaging that converts.' },
+    { name:'Competitor Researcher', desc:'Analyzes stored competitor data and identifies Scalvora\'s unique positioning gaps.', icon:'🔍', color:'#FEE2E2', accent:'#DC2626', prompt:'Act as Scalvora\'s Competitor Researcher. Analyze all stored competitor data. Find the positioning gap Scalvora should own and how to communicate it.' },
+    { name:'Offer Consultant', desc:'Reviews your stored services, client results, and market data to suggest offer improvements.', icon:'💡', color:'#F0FDF4', accent:'#059669', prompt:'Act as an Offer Consultant. Using Scalvora\'s services, case studies, and call insights, recommend how to package and position the core offer for maximum conversion.' },
+    { name:'Newsletter Writer', desc:'Writes a full newsletter edition using your personal stories, insights, and Scalvora brand voice.', icon:'✉️', color:'#FEF3C7', accent:'#D97706', prompt:'Act as Narender\'s Newsletter Writer. Write a full newsletter edition that mixes personal insight, a Scalvora framework, and one client lesson. Voice: direct, founder-led, premium.' }
+  ];
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">AI Agents</div>
+        <div class="section-desc">Specialized AI assistants that each have full access to your brand context, intelligence, and goals.</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="gap:14px">
+      ${agents.map((a,i) => `
+        <div class="agent-card">
+          <div class="agent-avatar" style="background:${a.color}">
+            <span style="font-size:22px">${a.icon}</span>
+          </div>
+          <div class="agent-name">${a.name}</div>
+          <div class="agent-desc">${a.desc}</div>
+          <div class="agent-use"><button class="btn btn-ghost btn-sm" style="color:var(--accent);border-color:var(--accent-mid)" onclick="runAgent(${i})">Run Agent →</button></div>
+        </div>`).join('')}
+    </div>
+  `;
+
+  window._agents = agents;
+}
+
+async function runAgent(index) {
+  const agent = window._agents?.[index];
+  if (!agent) return;
+
+  showModal(`${agent.icon} ${agent.name}`,
+    `<div class="info-box mb-4"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2A1 1 0 018 4zm0 3h1v5H7V7h1z"/></svg>Agent is analyzing your full brand context…</div>
+    <div style="padding:32px;text-align:center"><div class="loading-dots"><span></span><span></span><span></span></div></div>`,
+    '', 'modal-lg'
+  );
+
+  try {
+    const ctx = buildMasterContext();
+    const result = await callClaude(`${ctx}\n\n---\n\n${agent.prompt}`);
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div class="ai-output"><div class="ai-output-label">${agent.name} · Agent Output</div><div class="ai-output-content">${result.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
+    const modal = document.querySelector('.modal');
+    if (modal && !modal.querySelector('.modal-footer')) {
+      const footer = document.createElement('div'); footer.className = 'modal-footer';
+      footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('.ai-output-content').textContent);toast('Copied!','success')">Copy Output</button>`;
+      modal.appendChild(footer);
+    }
+  } catch(e) {
+    const body = document.querySelector('.modal-body');
+    if (body) body.innerHTML = `<div style="padding:20px;color:var(--danger)">Error: ${e.message}</div>`;
+  }
+}
+
+// ============================================================
+// BRAND ASSETS
+// ============================================================
+function renderAssets(el, actions) {
+  const assets = DB.get('brandAssets', []);
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="showAddAsset()">+ Add Asset</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Brand Assets</div>
+        <div class="section-desc">Store your logos, color palettes, typography specs, and visual guidelines.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:18px;align-items:start">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Brand Colors</div></div>
+        <div class="card-body">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+            ${[{name:'Primary',hex:'#0D1117'},{name:'Accent Blue',hex:'#2563EB'},{name:'Background',hex:'#F7F6F3'},{name:'Border',hex:'#E5E7EB'}].map(c=>`
+              <div style="text-align:center">
+                <div style="width:52px;height:52px;border-radius:10px;background:${c.hex};border:1px solid var(--border);margin-bottom:5px"></div>
+                <div style="font-size:11px;font-weight:600;color:var(--primary)">${c.name}</div>
+                <div style="font-size:10.5px;color:var(--text-muted)">${c.hex}</div>
+              </div>`).join('')}
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Custom Brand Colors</label>
+            <textarea class="form-textarea" id="a-colors" placeholder="#0D1117 — Primary Black&#10;#2563EB — Scalvora Blue&#10;#F7F6F3 — Background">${DB.get('brandColors','')}</textarea>
+            <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="DB.set('brandColors',document.getElementById('a-colors').value);toast('Saved','success')">Save Colors</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Typography</div></div>
+        <div class="card-body">
+          <div style="margin-bottom:16px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:22px;color:var(--primary);margin-bottom:4px">Bricolage Grotesque</div>
+            <div style="font-size:12px;color:var(--text-muted)">Headings — Bold, 700–800 weight</div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div style="font-family:'DM Sans',sans-serif;font-size:15px;color:var(--primary);margin-bottom:4px">DM Sans — Body text that reads cleanly at small sizes.</div>
+            <div style="font-size:12px;color:var(--text-muted)">Body — Regular, 400–500 weight</div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Additional Typography Notes</label>
+            <textarea class="form-textarea" id="a-typography" placeholder="Font pairs, usage rules, size scale…">${DB.get('brandTypography','')}</textarea>
+            <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="DB.set('brandTypography',document.getElementById('a-typography').value);toast('Saved','success')">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-column:span 2">
+        <div class="card-header"><div class="card-title">Design Guidelines & Visual Style</div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Visual Style Description</label>
+            <textarea class="form-textarea" id="a-style" placeholder="Premium SaaS, glassmorphism cards, clean spacing, dark-on-light, enterprise aesthetic…">${DB.get('brandStyle','')}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Design Guidelines</label>
+            <textarea class="form-textarea" id="a-guidelines" placeholder="Always use rounded corners (8–14px), avoid drop shadows > 12px, use generous whitespace, icons at 16px in nav…">${DB.get('brandGuidelines','')}</textarea>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="DB.set('brandStyle',document.getElementById('a-style').value);DB.set('brandGuidelines',document.getElementById('a-guidelines').value);toast('Saved','success')">Save Guidelines</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// PROMPT LIBRARY
+// ============================================================
+function renderPrompts(el, actions) {
+  const prompts = DB.get('prompts', DEFAULT.prompts);
+  const cats = ['All','Content','Research','Offers','Sales','Personal Brand','Scalvora','Competitor Analysis'];
+
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="showAddPrompt()">+ Save Prompt</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Prompt Library</div>
+        <div class="section-desc">Your best-performing prompts, categorized and ready to use.</div>
+      </div>
+    </div>
+
+    <div class="pill-tabs mb-4" id="prompt-tabs">
+      ${cats.map((c,i)=>`<div class="pill-tab ${i===0?'active':''}" onclick="filterPrompts('${c}',this)">${c}</div>`).join('')}
+    </div>
+
+    <div id="prompts-list" style="display:flex;flex-direction:column;gap:10px">
+      ${renderPromptList(prompts)}
+    </div>
+  `;
+}
+
+function renderPromptList(prompts) {
+  if (prompts.length === 0) return `<div class="card"><div class="empty-state"><div class="empty-title">No prompts yet</div><div class="empty-desc">Save your best prompts here for quick reuse.</div></div></div>`;
+  return prompts.map(p => `
+    <div class="prompt-card">
+      <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="#2563EB"><path d="M2 2h12v1H2V2zm2 3h8v1H4V5zm-2 3h12v1H2V8zm2 3h6v1H4v-1z"/></svg>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-title">${p.title}</div>
+        <div class="prompt-preview">${p.prompt.slice(0,100)}…</div>
+        <div class="mt-2"><span class="tag accent">${p.category}</span></div>
+      </div>
+      <div class="prompt-actions">
+        <button class="btn btn-ghost btn-sm" onclick="usePrompt('${p.id}')">Use</button>
+        <button class="btn btn-ghost btn-sm" onclick="viewPrompt('${p.id}')">View</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="deletePrompt('${p.id}')">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterPrompts(cat, el) {
+  document.querySelectorAll('#prompt-tabs .pill-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const prompts = DB.get('prompts', DEFAULT.prompts).filter(p => cat === 'All' || p.category === cat);
+  const list = document.getElementById('prompts-list');
+  if (list) list.innerHTML = renderPromptList(prompts);
+}
+
+function showAddPrompt() {
+  const cats = ['Content','Research','Offers','Sales','Personal Brand','Scalvora','Competitor Analysis'];
+  showModal('Save New Prompt',
+    `<div class="form-group"><label class="form-label">Prompt Title *</label><input class="form-input" id="pr-title" placeholder="e.g. Cold Email Subject Line Generator"></div>
+    <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="pr-cat">${cats.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Prompt *</label><textarea class="form-textarea" id="pr-prompt" style="min-height:160px" placeholder="Your full prompt text…"></textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="savePrompt()">Save Prompt</button>`
+  );
+}
+
+function savePrompt() {
+  const title = document.getElementById('pr-title')?.value.trim();
+  const category = document.getElementById('pr-cat')?.value;
+  const prompt = document.getElementById('pr-prompt')?.value.trim();
+  if (!title || !prompt) { toast('Fill in title and prompt', 'error'); return; }
+  const prompts = DB.get('prompts', DEFAULT.prompts);
+  prompts.unshift({ id: 'pr_' + Date.now(), title, category, prompt });
+  DB.set('prompts', prompts);
+  toast('Prompt saved!', 'success');
+  closeModal();
+  if (currentPage === 'prompts') render();
+}
+
+function viewPrompt(id) {
+  const p = DB.get('prompts', DEFAULT.prompts).find(x => x.id === id);
+  if (!p) return;
+  showModal(p.title,
+    `<div><span class="tag accent">${p.category}</span></div>
+    <div style="margin-top:14px;font-size:13.5px;color:var(--primary);line-height:1.7;white-space:pre-wrap;border:1px solid var(--border);border-radius:8px;padding:14px;background:#FAFAF8">${p.prompt}</div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+     <button class="btn btn-primary" onclick="navigator.clipboard.writeText(\`${p.prompt.replace(/`/g,"'")}\`);toast('Copied!','success')">Copy Prompt</button>`,
+    'modal-lg'
+  );
+}
+
+function usePrompt(id) {
+  const p = DB.get('prompts', DEFAULT.prompts).find(x => x.id === id);
+  if (!p) return;
+  navigator.clipboard.writeText(p.prompt);
+  toast(`"${p.title}" copied — paste into Content Studio or use directly`, 'success');
+}
+
+function deletePrompt(id) {
+  if (!confirm('Delete this prompt?')) return;
+  DB.set('prompts', DB.get('prompts', DEFAULT.prompts).filter(p => p.id !== id));
+  toast('Prompt deleted', 'default');
+  if (currentPage === 'prompts') render();
+}
+
+// ============================================================
+// EXPORT CENTER
+// ============================================================
+function renderExport(el, actions) {
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Export Center</div>
+        <div class="section-desc">Export your stored intelligence and generated content in various formats.</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="gap:16px">
+      ${[
+        {title:'Personal Brand Context',desc:'Your full story, beliefs, pillars and voice',key:'personal',icon:'👤'},
+        {title:'Scalvora Brand Context',desc:'Mission, offers, voice, and methodology',key:'scalvora',icon:'📦'},
+        {title:'Knowledge Vault',desc:'All uploaded documents and summaries',key:'knowledge',icon:'📚'},
+        {title:'Sales Intelligence',desc:'All call analyses and extracted insights',key:'salesCalls',icon:'📞'},
+        {title:'Competitor Analysis',desc:'All stored competitor profiles and analyses',key:'competitors',icon:'🔍'},
+        {title:'Generated Content',desc:'All content pieces created in the studio',key:'contentPieces',icon:'✍️'},
+        {title:'Prompt Library',desc:'All saved prompts and templates',key:'prompts',icon:'💬'},
+        {title:'Master Context',desc:'Full combined context used for AI generation',key:'master',icon:'🧠'},
+      ].map(item => `
+        <div class="card">
+          <div class="card-body">
+            <div style="font-size:26px;margin-bottom:10px">${item.icon}</div>
+            <div style="font-weight:700;font-family:var(--font-head);font-size:14.5px;color:var(--primary);margin-bottom:4px">${item.title}</div>
+            <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px">${item.desc}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-ghost btn-sm" onclick="exportData('${item.key}','txt')">TXT</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportData('${item.key}','md')">Markdown</button>
+              <button class="btn btn-primary btn-sm" onclick="exportData('${item.key}','copy')">Copy</button>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function exportData(key, format) {
+  let data = '';
+  if (key === 'master') {
+    data = buildMasterContext();
+  } else {
+    const raw = DB.get(key);
+    if (!raw) { toast('No data to export', 'error'); return; }
+    if (typeof raw === 'string') data = raw;
+    else if (Array.isArray(raw)) {
+      data = raw.map(item => {
+        if (typeof item === 'object') return Object.entries(item).map(([k,v]) => `${k}: ${v}`).join('\n');
+        return item;
+      }).join('\n\n---\n\n');
+    } else {
+      data = Object.entries(raw).map(([k,v]) => `${k}:\n${v}`).join('\n\n');
+    }
+  }
+
+  if (format === 'copy') { navigator.clipboard.writeText(data); toast('Copied to clipboard!', 'success'); return; }
+
+  const ext = format === 'md' ? 'md' : 'txt';
+  const blob = new Blob([data], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `scalvora-${key}.${ext}`;
+  a.click(); URL.revokeObjectURL(url);
+  toast(`Exported as .${ext}`, 'success');
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings(el, actions) {
+  const s = DB.get('settings', DEFAULT.settings);
+  actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Settings</button>`;
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <div class="section-title">Settings</div>
+        <div class="section-desc">Configure your API key, defaults, and preferences.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:18px;align-items:start">
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">API Configuration</div></div>
+          <div class="card-body">
+            <div class="info-box mb-4">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2A1 1 0 018 4zm0 3h1v5H7V7h1z"/></svg>
+              <div>Your API key is stored locally in your browser. It never leaves your device. Get your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Anthropic API Key</label>
+              <input class="form-input" id="set-key" type="password" value="${s.anthropicKey||''}" placeholder="sk-ant-…">
+              <div class="form-hint">Required for all AI features. Uses claude-sonnet-4-6 model.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">AI Defaults</div></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Default Tone</label>
+              <select class="form-select" id="set-tone">
+                ${['Professional','Direct & Authoritative','Educational','Storytelling','Conversational'].map(t=>`<option ${t===s.defaultTone?'selected':''}>${t}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Default Audience</label>
+              <input class="form-input" id="set-audience" value="${s.defaultAudience||'B2B Agency Owners'}" placeholder="Who you're primarily writing for">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-4">
+          <div class="card-header"><div class="card-title">Data Management</div></div>
+          <div class="card-body">
+            <div style="margin-bottom:14px">
+              <div style="font-size:13.5px;font-weight:600;color:var(--primary);margin-bottom:4px">Local Storage</div>
+              <div style="font-size:13px;color:var(--text-muted)">All data is stored in your browser's localStorage. No server, no cloud, no subscription.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="exportAll()">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 13h10v1H3v-1zm4-10v7.6l-2.5-2.5-.7.7L8 13l4.2-4.2-.7-.7L9 10.6V3H7z"/></svg>
+                Export All Data (JSON backup)
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="importData()">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 13h10v1H3v-1zm4-8.6l2.5 2.5.7-.7L6 3 1.8 7.2l.7.7L5 5.4V13h2V4.4z"/></svg>
+                Import Data (from backup)
+              </button>
+              <hr style="border:none;border-top:1px solid var(--border)">
+              <button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B;border:none" onclick="clearAllData()">
+                ⚠️ Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">About Scalvora OS</div></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div class="logo-icon" style="width:38px;height:38px"><svg viewBox="0 0 16 16" fill="none"><path d="M2 8L8 2L14 8L8 14L2 8Z" fill="white" opacity=".9"/><path d="M8 5L11 8L8 11L5 8L8 5Z" fill="white"/></svg></div>
+              <div><div style="font-family:var(--font-head);font-weight:700;font-size:16px">Scalvora OS</div><div style="font-size:12px;color:var(--text-muted)">v1.0 · Founder Operating System</div></div>
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6">Built for Narender Yadav and Scalvora. A premium AI-powered second brain that runs entirely in your browser — no backend, no database, no subscriptions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function saveSettings() {
+  const s = {
+    anthropicKey: document.getElementById('set-key')?.value || '',
+    defaultTone: document.getElementById('set-tone')?.value || 'Professional',
+    defaultAudience: document.getElementById('set-audience')?.value || 'B2B Agency Owners'
+  };
+  DB.set('settings', s);
+  toast('Settings saved!', 'success');
+}
+
+function exportAll() {
+  const allKeys = ['personal','scalvora','knowledge','competitors','salesCalls','contentPieces','prompts','calendar','settings','brandColors','brandTypography','brandStyle','brandGuidelines'];
+  const backup = {};
+  allKeys.forEach(k => { const v = DB.get(k); if(v) backup[k] = v; });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `scalvora-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Backup exported!', 'success');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        Object.entries(data).forEach(([k,v]) => DB.set(k, v));
+        toast('Data imported successfully!', 'success');
+        render();
+      } catch { toast('Invalid backup file', 'error'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function clearAllData() {
+  if (!confirm('This will delete ALL your data including knowledge vault, personal brand, and content. Are you absolutely sure?')) return;
+  if (!confirm('Last chance. This cannot be undone. Delete everything?')) return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('scalvora_'));
+  keys.forEach(k => localStorage.removeItem(k));
+  toast('All data cleared', 'default');
+  render();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
+    if (diff < 604800000) return `${Math.floor(diff/86400000)}d ago`;
+    return d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+  } catch { return dateStr; }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateKVBadge();
+render();
+</script>
+</body>
+</html>
